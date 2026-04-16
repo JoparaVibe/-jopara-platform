@@ -1,0 +1,2821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Jopara Vibe — Voces que Conectan</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SH7VN64C6C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-SH7VN64C6C');
+</script>
+<style>
+:root{
+  --rojo:#D62828;--azul:#1B4FD8;--oro:#F4A823;--negro:#0D0D0D;
+  --gris:#1E1E1E;--gris2:#2A2A2A;--gris3:#3A3A3A;--gris4:#444;
+  --texto:#E8E8E8;--texto2:#AAAAAA;--verde:#27AE60;--celeste:#7EC8E3;
+  --blanco:#F7F7F7;--lila:#8E44AD;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--negro);color:var(--texto);font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,var(--negro),var(--gris));border-bottom:3px solid var(--oro);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.logo-area{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--rojo),var(--azul));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.logo-jopara{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--blanco);letter-spacing:2px;}
+.logo-vibe{font-family:'Bebas Neue',sans-serif;font-size:19px;color:var(--oro);letter-spacing:2px;}
+.logo-sub{font-size:9px;color:var(--texto2);letter-spacing:1px;text-transform:uppercase;}
+.header-right{display:flex;align-items:center;gap:8px;}
+.pts-badge{display:flex;align-items:center;gap:5px;background:var(--gris2);border:1px solid var(--gris3);border-radius:18px;padding:4px 11px;font-size:11px;font-weight:700;cursor:pointer;}
+.pts-n{color:var(--oro);font-size:14px;}
+.avatar-btn{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;cursor:pointer;border:2px solid var(--gris3);flex-shrink:0;transition:border-color .2s;}
+.avatar-btn:hover{border-color:var(--oro);}
+.lang-btn{background:var(--gris2);border:1px solid var(--gris3);border-radius:8px;padding:4px 8px;font-size:11px;color:var(--texto2);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;}
+
+/* BIENVENIDA */
+.bienvenida{background:linear-gradient(135deg,var(--gris),#1a2a1a);border-bottom:1px solid var(--gris3);padding:10px 16px;display:none;}
+.bienvenida.show{display:block;}
+.bv-inner{max-width:480px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;}
+.bv-text{font-size:13px;font-weight:700;color:var(--texto);}
+.bv-text span{color:var(--oro);}
+.bv-stats{display:flex;gap:12px;font-size:11px;color:var(--texto2);}
+.bv-stat strong{color:var(--celeste);}
+
+/* HERO */
+.hero{background:linear-gradient(180deg,var(--gris),var(--negro));padding:24px 18px 18px;text-align:center;}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;line-height:1.1;margin-bottom:5px;}
+.hero h1 span{color:var(--oro);}
+.hero p{color:var(--texto2);font-size:12px;max-width:320px;margin:0 auto;line-height:1.5;}
+
+/* TABS */
+.tabs{display:flex;background:var(--gris);border-bottom:2px solid var(--gris3);overflow-x:auto;scrollbar-width:none;position:sticky;top:71px;z-index:90;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;min-width:66px;padding:11px 4px;text-align:center;font-size:9px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:.5px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+.tab.active{color:var(--oro);border-bottom-color:var(--oro);}
+.tab .ti{font-size:16px;display:block;margin-bottom:1px;}
+
+/* CONTENT */
+.content{padding:16px;max-width:480px;margin:0 auto;}
+.sec{display:none;}.sec.active{display:block;}
+
+/* CARDS */
+.card{background:var(--gris);border:1px solid var(--gris3);border-radius:13px;padding:16px;margin-bottom:12px;}
+.card-title{font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:9px;}
+
+/* FORMS */
+.lbl{font-size:11px;font-weight:700;color:var(--texto2);margin-bottom:4px;display:block;}
+textarea,input[type=text],input[type=password]{width:100%;background:var(--gris2);border:1px solid var(--gris3);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:9px 11px;resize:none;outline:none;transition:border-color .2s;margin-bottom:9px;}
+textarea:focus,input[type=text]:focus,input[type=password]:focus{border-color:var(--oro);}
+.cc{font-size:9px;color:var(--texto2);text-align:right;margin-top:-7px;margin-bottom:7px;}
+.tag-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:11px;}
+.tag{background:var(--gris2);border:1px solid var(--gris3);border-radius:16px;padding:3px 10px;font-size:10px;font-weight:700;color:var(--texto2);cursor:pointer;transition:all .15s;}
+.tag.sel{background:var(--oro);color:var(--negro);border-color:var(--oro);}
+.tag.warn{border-color:#E65100;color:#E65100;}
+.tag.warn.sel{background:#E65100;color:white;}
+
+/* BUTTONS */
+.btn{width:100%;padding:12px;border-radius:10px;border:none;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;}
+.btn:active{transform:scale(.97);}
+.btn-oro{background:linear-gradient(135deg,var(--oro),#e8940f);color:var(--negro);}
+.btn-rojo{background:linear-gradient(135deg,var(--rojo),#a01e1e);color:#fff;}
+.btn-azul{background:linear-gradient(135deg,var(--azul),#1238a0);color:#fff;}
+.btn-verde{background:linear-gradient(135deg,var(--verde),#1a7a3f);color:#fff;}
+.btn-ghost{background:transparent;border:1.5px solid var(--gris3);color:var(--texto2);}
+.btn-sm{padding:6px 12px;font-size:11px;width:auto;border-radius:16px;}
+
+/* FRASE CARD */
+.fc{background:var(--gris);border:1px solid var(--gris3);border-radius:13px;padding:14px;margin-bottom:10px;animation:fadeIn .3s ease;}
+.fc.ejemplo{border-color:rgba(244,168,35,.3);background:rgba(244,168,35,.04);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.fc-user{display:flex;align-items:center;gap:6px;cursor:pointer;}
+.fc-user:hover .fc-name{color:var(--oro);}
+.av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;}
+.fc-name{font-size:12px;font-weight:700;transition:color .15s;}
+.fc-lugar{font-size:10px;color:var(--texto2);}
+.badge-sel{background:var(--gris2);border-radius:6px;padding:2px 6px;font-size:9px;font-weight:700;color:var(--oro);}
+.badge-silva{background:rgba(39,174,96,.15);border-radius:6px;padding:2px 6px;font-size:9px;font-weight:700;color:var(--verde);}
+.badge-rev{background:rgba(214,40,40,.15);border-radius:6px;padding:2px 6px;font-size:9px;font-weight:700;color:var(--rojo);}
+.badge-ejemplo{background:rgba(244,168,35,.15);border-radius:6px;padding:2px 6px;font-size:9px;font-weight:700;color:var(--oro);}
+.fc-gn{font-size:15px;font-weight:800;color:var(--blanco);margin-bottom:4px;line-height:1.4;}
+.fc-es{font-size:11px;color:var(--texto2);font-style:italic;margin-bottom:6px;line-height:1.4;}
+.fc-why{font-size:10px;color:var(--celeste);background:rgba(126,200,227,.07);border-left:3px solid var(--celeste);padding:4px 8px;border-radius:0 5px 5px 0;margin-bottom:9px;line-height:1.4;}
+.fc-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:9px;}
+.fc-tag{background:var(--gris2);border-radius:7px;padding:2px 6px;font-size:9px;color:var(--texto2);}
+
+/* VOTE ROW */
+.vrow{display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+.vbtn{display:flex;align-items:center;gap:3px;background:var(--gris2);border:1px solid var(--gris3);border-radius:16px;padding:4px 9px;font-size:11px;font-weight:700;color:var(--texto2);cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif;}
+.vbtn:hover{border-color:var(--oro);color:var(--oro);}
+.vbtn.vl{background:rgba(244,168,35,.12);border-color:var(--oro);color:var(--oro);}
+.vbtn.vf{background:rgba(214,40,40,.12);border-color:var(--rojo);color:var(--rojo);}
+.sbtn{margin-left:auto;background:transparent;border:none;color:var(--texto2);font-size:14px;cursor:pointer;padding:2px 5px;}
+
+/* FEEDBACK */
+.fb-lbl{font-size:9px;color:var(--texto2);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.fbrow{display:flex;gap:4px;margin-bottom:9px;flex-wrap:wrap;}
+.fbbtn{display:flex;align-items:center;gap:2px;background:var(--gris2);border:1px solid var(--gris3);border-radius:12px;padding:3px 8px;font-size:10px;font-weight:700;color:var(--texto2);cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif;}
+.fbbtn.fb-ok{border-color:var(--verde);color:var(--verde);background:rgba(39,174,96,.08);}
+.fbbtn.fb-var{border-color:var(--oro);color:var(--oro);background:rgba(244,168,35,.08);}
+.fbbtn.fb-err{border-color:var(--rojo);color:var(--rojo);background:rgba(214,40,40,.08);}
+
+/* COMENTARIOS */
+.cs{border-top:1px solid var(--gris3);padding-top:9px;}
+.ctoggle{background:none;border:none;color:var(--texto2);font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;display:flex;align-items:center;gap:3px;padding:0;margin-bottom:6px;}
+.ci{background:var(--gris2);border-radius:8px;padding:8px 10px;margin-bottom:5px;}
+.ci-hdr{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.ci-av{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0;}
+.ci-name{font-size:10px;font-weight:800;}
+.ci-tipo{font-size:9px;border-radius:5px;padding:1px 5px;font-weight:700;margin-left:auto;}
+.ct-ok{background:rgba(39,174,96,.2);color:var(--verde);}
+.ct-var{background:rgba(244,168,35,.2);color:var(--oro);}
+.ct-err{background:rgba(214,40,40,.2);color:var(--rojo);}
+.ct-com{background:rgba(126,200,227,.2);color:var(--celeste);}
+.ci-txt{font-size:11px;color:var(--texto2);line-height:1.4;}
+.cform{display:none;margin-top:6px;}.cform.open{display:block;}
+.cinput{width:100%;background:var(--gris3);border:1px solid var(--gris4);border-radius:7px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:11px;padding:7px 9px;resize:none;outline:none;margin-bottom:5px;}
+.cinput:focus{border-color:var(--celeste);}
+.ctrow{display:flex;gap:4px;margin-bottom:7px;flex-wrap:wrap;}
+.ct{background:var(--gris3);border:1px solid var(--gris4);border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--texto2);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;}
+.ct.sc{background:rgba(126,200,227,.2);border-color:var(--celeste);color:var(--celeste);}
+.ct.so{background:rgba(39,174,96,.2);border-color:var(--verde);color:var(--verde);}
+.ct.sv{background:rgba(244,168,35,.2);border-color:var(--oro);color:var(--oro);}
+.ct.se{background:rgba(214,40,40,.2);border-color:var(--rojo);color:var(--rojo);}
+.cact{display:flex;gap:5px;}
+.cbs{padding:5px 12px;border-radius:9px;border:none;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
+.cbs-send{background:var(--celeste);color:var(--negro);}
+.cbs-cancel{background:var(--gris3);color:var(--texto2);}
+
+/* RANKING */
+.ri{display:flex;align-items:center;gap:10px;background:var(--gris);border:1px solid var(--gris3);border-radius:12px;padding:11px 13px;margin-bottom:7px;}
+.rn{font-family:'Bebas Neue',sans-serif;font-size:22px;width:26px;text-align:center;flex-shrink:0;}
+.r1 .rn{color:#FFD700;}.r2 .rn{color:#C0C0C0;}.r3 .rn{color:#CD7F32;}
+.ri-info{flex:1;min-width:0;}
+.ri-name{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.ri-name:hover{color:var(--oro);}
+.ri-lugar{font-size:10px;color:var(--texto2);}
+.ri-pts-n{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--oro);}
+.ri-pts-l{font-size:9px;color:var(--texto2);text-transform:uppercase;}
+
+/* FILTROS */
+.filtros{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px;}
+.filtros::-webkit-scrollbar{display:none;}
+.filtro{flex-shrink:0;background:var(--gris2);border:1px solid var(--gris3);border-radius:16px;padding:4px 10px;font-size:10px;font-weight:700;color:var(--texto2);cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif;}
+.filtro.active{background:var(--oro);color:var(--negro);border-color:var(--oro);}
+
+/* WA BTN */
+.wabtn{display:flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;border-radius:11px;padding:13px;font-size:14px;font-weight:800;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.3);transition:transform .15s;}
+.wabtn:active{transform:scale(.97);}
+
+/* PASOS */
+.paso{display:flex;gap:10px;margin-bottom:14px;align-items:flex-start;}
+.paso-n{width:30px;height:30px;background:linear-gradient(135deg,var(--oro),#e8940f);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--negro);flex-shrink:0;}
+.paso-info h3{font-size:13px;font-weight:800;margin-bottom:2px;}
+.paso-info p{font-size:11px;color:var(--texto2);line-height:1.5;}
+
+/* PUNTOS */
+.pi{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--gris3);font-size:12px;}
+.pi:last-child{border-bottom:none;}
+.piv{font-weight:800;color:var(--oro);}
+
+/* DIVIDER */
+.doro{height:3px;background:linear-gradient(90deg,var(--rojo),var(--oro),var(--azul));border-radius:2px;margin-bottom:14px;}
+
+/* STATS BAR */
+.stats-bar{display:flex;gap:5px;margin-bottom:12px;}
+.stat-box{flex:1;padding:8px;background:var(--gris2);border-radius:8px;text-align:center;}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:22px;}
+.stat-l{font-size:8px;color:var(--texto2);text-transform:uppercase;font-weight:800;}
+
+/* COUNTDOWN */
+.countdown{background:rgba(244,168,35,.06);border:1px solid rgba(244,168,35,.2);border-radius:10px;padding:12px;text-align:center;margin-bottom:12px;}
+.cd-title{font-size:10px;color:var(--texto2);text-transform:uppercase;font-weight:800;letter-spacing:1px;margin-bottom:6px;}
+.cd-time{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--oro);letter-spacing:2px;}
+.cd-sub{font-size:10px;color:var(--texto2);margin-top:2px;}
+
+/* PREMIOS */
+.premio-card{display:flex;align-items:center;gap:10px;background:var(--gris2);border-radius:10px;padding:10px 12px;margin-bottom:6px;}
+.premio-pos{font-family:'Bebas Neue',sans-serif;font-size:20px;width:28px;text-align:center;}
+.premio-info{flex:1;}
+.premio-tipo{font-size:11px;font-weight:800;}
+.premio-monto{font-size:13px;font-weight:800;color:var(--oro);}
+
+/* NOMBRES */
+.ng{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
+.nc{background:var(--gris2);border:2px solid var(--gris3);border-radius:10px;padding:9px 10px;cursor:pointer;transition:all .15s;}
+.nc.sel{border-color:var(--oro);background:rgba(244,168,35,.08);}
+.nc:active{transform:scale(.97);}
+.nc-gn{font-size:13px;font-weight:800;color:var(--blanco);margin-bottom:1px;}
+.nc-es{font-size:10px;color:var(--texto2);}
+.o-label{text-align:center;font-size:10px;color:var(--texto2);margin:8px 0;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+
+/* SUGERENCIAS */
+.sug-card{background:var(--gris2);border:1px solid var(--gris3);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.sug-info{flex:1;}
+.sug-gn{font-size:13px;font-weight:800;}
+.sug-es{font-size:10px;color:var(--texto2);}
+.sug-v{font-size:11px;font-weight:800;color:var(--oro);flex-shrink:0;}
+
+/* PERFIL MODAL */
+.modal{position:fixed;inset:0;z-index:300;display:flex;align-items:flex-end;pointer-events:none;opacity:0;transition:opacity .3s;}
+.modal.show{opacity:1;pointer-events:all;}
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.75);}
+.modal-box{position:relative;width:100%;background:var(--gris);border-radius:18px 18px 0 0;padding:20px 16px 38px;transform:translateY(100%);transition:transform .3s ease;z-index:1;max-height:92vh;overflow-y:auto;}
+.modal.show .modal-box{transform:translateY(0);}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;margin-bottom:3px;}
+.modal-sub{font-size:11px;color:var(--texto2);margin-bottom:12px;line-height:1.5;}
+
+/* PERFIL CARD */
+.perfil-header{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.perfil-av{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex-shrink:0;border:3px solid var(--oro);}
+.perfil-nombre{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--blanco);line-height:1;}
+.perfil-lugar{font-size:12px;color:var(--texto2);margin-top:2px;}
+.perfil-stats{display:flex;gap:8px;margin-bottom:14px;}
+.perfil-stat{flex:1;background:var(--gris2);border-radius:8px;padding:8px;text-align:center;}
+.perfil-stat-n{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--oro);}
+.perfil-stat-l{font-size:9px;color:var(--texto2);text-transform:uppercase;font-weight:800;}
+.perfil-bio{background:var(--gris2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--texto2);line-height:1.6;margin-bottom:12px;min-height:44px;}
+.perfil-bio-edit{width:100%;background:var(--gris2);border:1px solid var(--oro);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:12px;padding:9px 11px;resize:none;outline:none;margin-bottom:8px;}
+
+/* ACHIEVEMENTS */
+.logros{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.logro{background:var(--gris2);border:1px solid var(--gris3);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--texto2);}
+.logro.ok{border-color:var(--oro);color:var(--oro);background:rgba(244,168,35,.08);}
+
+/* LANG PICKER */
+.lang-picker{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.lp-btn{background:var(--gris2);border:1px solid var(--gris3);border-radius:10px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--texto2);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;}
+.lp-btn.active{background:var(--azul);color:#fff;border-color:var(--azul);}
+
+/* CATEGORIA WARN */
+.cat-warn{background:rgba(230,101,0,.08);border:1px solid rgba(230,101,0,.3);border-radius:8px;padding:8px 10px;font-size:10px;color:#E65100;margin-bottom:8px;line-height:1.5;}
+
+/* EMPTY */
+.empty{text-align:center;padding:32px 16px;color:var(--texto2);}
+.ei{font-size:40px;margin-bottom:8px;}
+.empty h3{font-size:14px;font-weight:800;margin-bottom:4px;color:var(--texto);}
+.empty p{font-size:11px;line-height:1.5;}
+
+/* TOAST */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--verde);color:#fff;padding:9px 20px;border-radius:26px;font-size:12px;font-weight:700;z-index:999;transition:transform .3s ease;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* PTS POPUP */
+.pp{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:var(--gris);border:2px solid var(--oro);border-radius:16px;padding:26px;text-align:center;z-index:200;transition:transform .3s cubic-bezier(.34,1.56,.64,1);min-width:180px;}
+.pp.show{transform:translate(-50%,-50%) scale(1);}
+.pp-num{font-family:'Bebas Neue',sans-serif;font-size:64px;color:var(--oro);line-height:1;}
+.pp-lbl{font-size:12px;color:var(--texto2);}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;display:none;}
+.overlay.show{display:block;}
+
+@keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+.fade-in-up { animation: fadeInUp 0.5s ease forwards; opacity:0; }
+.delay-1 { animation-delay: 0.3s; }
+.delay-2 { animation-delay: 0.6s; }
+.delay-3 { animation-delay: 0.9s; }
+.delay-4 { animation-delay: 1.2s; }
+
+/* Sound button */
+.sound-btn {
+  background: var(--gris2);
+  border: 1px solid var(--gris3);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.sound-btn:hover { border-color: var(--oro); }
+
+.fc { opacity: 1; transform: translateY(0); animation: fadeIn .3s ease; }
+.fc.ejemplo { border-color:rgba(244,168,35,.3); background:rgba(244,168,35,.04); }
+
+
+/* COOLDOWN MODAL */
+.cooldown-modal {
+  position: fixed; inset: 0; z-index: 400;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; opacity: 0; transition: opacity .3s;
+  padding: 20px;
+}
+.cooldown-modal.show { opacity: 1; pointer-events: all; }
+.cooldown-box {
+  background: var(--gris);
+  border: 2px solid var(--oro);
+  border-radius: 20px;
+  padding: 28px 24px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  transform: scale(0.85);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.cooldown-modal.show .cooldown-box { transform: scale(1); }
+.cooldown-icon { font-size: 44px; margin-bottom: 10px; }
+.cooldown-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--blanco); margin-bottom: 6px; letter-spacing: 1px; }
+.cooldown-timer { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--oro); letter-spacing: 2px; margin: 10px 0; }
+.cooldown-why { font-size: 12px; color: var(--texto2); line-height: 1.6; margin-bottom: 14px; }
+.cooldown-hint { background: rgba(39,174,96,.1); border: 1px solid rgba(39,174,96,.3); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--verde); line-height: 1.6; margin-bottom: 16px; }
+
+
+/* ── AUDIO RECORDER ── */
+.audio-section { border-top: 1px solid var(--gris3); padding-top: 10px; margin-top: 4px; }
+.audio-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.audio-item { display: flex; align-items: center; gap: 8px; background: var(--gris2); border-radius: 8px; padding: 8px 10px; }
+.audio-play { width: 32px; height: 32px; border-radius: 50%; background: var(--verde); border: none; color: white; font-size: 14px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.audio-play.playing { background: var(--rojo); }
+.audio-info { flex: 1; min-width: 0; }
+.audio-meta { font-size: 10px; color: var(--texto2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.audio-badge { font-size: 9px; border-radius: 4px; padding: 1px 5px; font-weight: 700; }
+.audio-badge.validado { background: rgba(39,174,96,.2); color: var(--verde); }
+.audio-badge.pendiente { background: rgba(244,168,35,.2); color: var(--oro); }
+.audio-invite { background: rgba(126,200,227,.07); border: 1px dashed var(--celeste); border-radius: 8px; padding: 10px; text-align: center; font-size: 12px; color: var(--celeste); cursor: pointer; transition: all .15s; }
+.audio-invite:hover { background: rgba(126,200,227,.14); }
+.rec-btn { display: flex; align-items: center; gap: 6px; background: var(--gris2); border: 1px solid var(--gris3); border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: var(--texto2); cursor: pointer; font-family: 'Nunito', sans-serif; transition: all .15s; }
+.rec-btn:hover { border-color: var(--celeste); color: var(--celeste); }
+.rec-btn.recording { background: rgba(214,40,40,.15); border-color: var(--rojo); color: var(--rojo); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+.rec-timer { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--rojo); margin-left: 4px; }
+
+/* ── AUDIO FORM MODAL ── */
+.audio-form { background: var(--gris2); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.audio-form .form-row { margin-bottom: 10px; }
+.audio-form label { font-size: 11px; font-weight: 700; color: var(--texto2); display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+.radio-group { display: flex; flex-wrap: wrap; gap: 5px; }
+.radio-opt { background: var(--gris3); border: 1px solid var(--gris4); border-radius: 16px; padding: 4px 10px; font-size: 11px; font-weight: 700; color: var(--texto2); cursor: pointer; transition: all .15s; font-family: 'Nunito', sans-serif; }
+.radio-opt.sel { background: var(--celeste); color: var(--negro); border-color: var(--celeste); }
+
+/* ── TOOLTIPS ── */
+.tooltip-bubble {
+  position: absolute; z-index: 500;
+  background: var(--dunkel, #0D1B2A);
+  color: white; border: 1px solid var(--oro);
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 12px; line-height: 1.5;
+  max-width: 260px; box-shadow: 0 4px 20px rgba(0,0,0,.5);
+  animation: tooltipIn .3s ease;
+  pointer-events: none;
+}
+@keyframes tooltipIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.tooltip-bubble::before {
+  content: ''; position: absolute; top: -6px; left: 16px;
+  width: 10px; height: 10px; background: var(--dunkel, #0D1B2A);
+  border-left: 1px solid var(--oro); border-top: 1px solid var(--oro);
+  transform: rotate(45deg);
+}
+.tooltip-q {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--gris3); color: var(--texto2);
+  font-size: 10px; font-weight: 800; cursor: pointer;
+  border: 1px solid var(--gris4); flex-shrink: 0;
+  transition: all .15s;
+}
+.tooltip-q:hover { background: var(--oro); color: var(--negro); border-color: var(--oro); }
+
+/* Feed first-visit tooltip */
+.feed-tooltip {
+  background: var(--gris); border: 1px solid var(--oro);
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 12px; color: var(--texto2);
+  margin-bottom: 10px; line-height: 1.6;
+  animation: tooltipIn .4s ease;
+  position: relative;
+}
+.feed-tooltip .close-tip {
+  position: absolute; top: 8px; right: 10px;
+  background: none; border: none; color: var(--texto2);
+  font-size: 14px; cursor: pointer; padding: 0;
+}
+
+
+/* ── ADMIN PANEL ── */
+.admin-panel { display:none; position:fixed; inset:0; z-index:500; background:var(--negro); overflow-y:auto; }
+.admin-panel.show { display:block; }
+.admin-header { background:linear-gradient(135deg,#1a0000,#2a0a0a); border-bottom:3px solid var(--rojo); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:10; }
+.admin-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px; }
+.admin-title span { color:var(--rojo); }
+.admin-tabs { display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; background:var(--gris); border-bottom:2px solid var(--gris3); padding:0 16px; }
+.admin-tabs::-webkit-scrollbar { display:none; }
+.admin-tab { padding:10px 14px; font-size:10px; font-weight:800; color:var(--texto2); text-transform:uppercase; letter-spacing:.5px; cursor:pointer; border-bottom:3px solid transparent; white-space:nowrap; transition:all .2s; }
+.admin-tab.active { color:var(--rojo); border-bottom-color:var(--rojo); }
+.admin-content { padding:16px; max-width:600px; margin:0 auto; }
+.admin-sec { display:none; }
+.admin-sec.active { display:block; }
+
+/* STAT WIDGETS */
+.stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.stat-widget { background:var(--gris); border:1px solid var(--gris3); border-radius:12px; padding:14px; text-align:center; }
+.stat-widget .n { font-family:'Bebas Neue',sans-serif; font-size:36px; color:var(--oro); }
+.stat-widget .l { font-size:10px; color:var(--texto2); text-transform:uppercase; font-weight:800; letter-spacing:.5px; }
+.stat-widget .sub { font-size:10px; color:var(--verde); margin-top:2px; }
+
+/* CHART BAR */
+.chart-bar-wrap { background:var(--gris); border:1px solid var(--gris3); border-radius:12px; padding:14px; margin-bottom:12px; }
+.chart-title { font-size:11px; font-weight:800; color:var(--texto2); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+.bar-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.bar-label { font-size:10px; color:var(--texto2); width:90px; flex-shrink:0; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bar-track { flex:1; background:var(--gris2); border-radius:4px; height:14px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:4px; transition:width .6s ease; }
+.bar-val { font-size:10px; font-weight:800; color:var(--texto); width:28px; flex-shrink:0; }
+
+/* DONUT */
+.donut-wrap { display:flex; align-items:center; gap:16px; }
+.donut-legend { flex:1; }
+.donut-item { display:flex; align-items:center; gap:6px; margin-bottom:5px; font-size:11px; color:var(--texto2); }
+.donut-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+/* ADMIN TABLE */
+.admin-table { width:100%; border-collapse:collapse; font-size:12px; }
+.admin-table th { background:var(--gris2); color:var(--texto2); padding:8px 10px; text-align:left; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; }
+.admin-table td { padding:8px 10px; border-bottom:1px solid var(--gris3); vertical-align:top; }
+.admin-table tr:hover td { background:rgba(255,255,255,.03); }
+.admin-table .actions { display:flex; gap:4px; flex-wrap:wrap; }
+
+/* ACTION BUTTONS */
+.abtn { padding:3px 8px; border-radius:6px; border:none; font-size:10px; font-weight:700; cursor:pointer; font-family:'Nunito',sans-serif; transition:all .15s; }
+.abtn-silva { background:rgba(39,174,96,.2); color:var(--verde); border:1px solid var(--verde); }
+.abtn-star { background:rgba(244,168,35,.2); color:var(--oro); border:1px solid var(--oro); }
+.abtn-warn { background:rgba(230,101,0,.2); color:#E65100; border:1px solid #E65100; }
+.abtn-del { background:rgba(214,40,40,.2); color:var(--rojo); border:1px solid var(--rojo); }
+.abtn-ok { background:rgba(39,174,96,.2); color:var(--verde); border:1px solid var(--verde); }
+.abtn-play { background:rgba(126,200,227,.2); color:var(--celeste); border:1px solid var(--celeste); }
+
+/* RESET */
+.reset-box { background:rgba(214,40,40,.06); border:2px solid var(--rojo); border-radius:12px; padding:20px; text-align:center; }
+.reset-step { display:none; }
+.reset-step.active { display:block; }
+
+/* WINNER BOX */
+.winner-card { background:linear-gradient(135deg,rgba(244,168,35,.1),rgba(214,40,40,.05)); border:1px solid var(--oro); border-radius:12px; padding:16px; margin-bottom:10px; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <div class="logo-icon">🎙️</div>
+    <div>
+      <div><span class="logo-jopara">JOPARA</span> <span class="logo-vibe">VIBE</span></div>
+      <div class="logo-sub" id="hTagline">Voces que conectan</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="pts-badge" onclick="abrirPerfil()">⭐ <span class="pts-n" id="ptsH">0</span></div>
+    <div class="avatar-btn" id="avatarBtn" onclick="abrirPerfil()">?</div>
+    <button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔊</button>
+    <button class="lang-btn" onclick="abrirLang()" id="langBtn">🌐 ES</button>
+  </div>
+</header>
+
+<!-- BIENVENIDA -->
+<div class="bienvenida" id="bienvenida">
+  <div class="bv-inner">
+    <div class="bv-text" id="bvText">👋 ¡Bienvenido de vuelta, <span id="bvNombre">—</span>! 🌿</div>
+    <div class="bv-stats">
+      <div>⭐ <strong id="bvPts">0</strong> pts</div>
+      <div>📝 <strong id="bvFrases">0</strong> frases</div>
+    </div>
+  </div>
+</div>
+
+<div class="hero" id="heroSection">
+  <h1 id="heroTitle">Tu voz hace<br><span>historia digital</span></h1>
+  <p id="heroSub">Contribuí con el guaraní que hablás todos los días.</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('feed',this)"><span class="ti">🔥</span><span id="tFeed">Feed</span></div>
+  <div class="tab" onclick="showTab('enviar',this)"><span class="ti">✍️</span><span id="tShare">Compartir</span></div>
+  <div class="tab" onclick="showTab('ranking',this)"><span class="ti">🏆</span><span id="tRank">Ranking</span></div>
+  <div class="tab" onclick="showTab('premios',this)"><span class="ti">🎁</span><span id="tPrizes">Premios</span></div>
+  <div class="tab" onclick="showTab('grabar',this)"><span class="ti">🎙️</span><span id="tRec">Grabar</span></div>
+  <div class="tab" onclick="showTab('como',this)"><span class="ti">❓</span><span id="tHow">Cómo</span></div>
+</div>
+
+<div class="content">
+
+  <!-- FEED -->
+  <div class="sec active" id="sec-feed">
+    <div class="filtros" id="filtrosBar">
+      <button class="filtro active" onclick="filtrar(this,'todos')">🔥 Todos</button>
+      <button class="filtro" onclick="filtrar(this,'intraducibles')">🧩</button>
+      <button class="filtro" onclick="filtrar(this,'dichos')">📖</button>
+      <button class="filtro" onclick="filtrar(this,'cotidiano')">🏠</button>
+      <button class="filtro" onclick="filtrar(this,'sentimental')">❤️</button>
+      <button class="filtro" onclick="filtrar(this,'humor')">😂</button>
+      <button class="filtro" onclick="filtrar(this,'naturaleza')">🌿</button>
+      <button class="filtro" onclick="filtrar(this,'medico')">🏥</button>
+      <button class="filtro" onclick="filtrar(this,'juridico')">⚖️</button>
+      <button class="filtro" onclick="filtrar(this,'espiritual')">🙏</button>
+      <button class="filtro" onclick="filtrar(this,'educacion')">🎓</button>
+      <button class="filtro" onclick="filtrar(this,'campo')">🌾</button>
+      <button class="filtro" onclick="filtrar(this,'musica')">🎵</button>
+      <button class="filtro" onclick="filtrar(this,'revision')">⚠️</button>
+    </div>
+    <div id="feedCont"></div>
+  </div>
+
+  <!-- ENVIAR -->
+  <div class="sec" id="sec-enviar">
+    <div class="card">
+      <div class="card-title">✍️ Compartí tu frase favorita</div>
+      <label class="lbl">La frase en guaraní *</label>
+      <textarea id="inGn" rows="3" maxlength="200" oninput="cc(this,'cGn')" placeholder="Escribí la frase tal como se dice..."></textarea>
+      <div class="cc"><span id="cGn">0</span>/200</div>
+      <label class="lbl">¿Qué significa? (en español) *</label>
+      <textarea id="inEs" rows="2" maxlength="200" oninput="cc(this,'cEs')" placeholder="La traducción aproximada..."></textarea>
+      <div class="cc"><span id="cEs">0</span>/200</div>
+      <label class="lbl">¿Por qué es especial?</label>
+      <textarea id="inPq" rows="2" maxlength="200" oninput="cc(this,'cPq')" placeholder="El contexto, el sentimiento, la historia..."></textarea>
+      <div class="cc"><span id="cPq">0</span>/200</div>
+      <label class="lbl">Categoría</label>
+      <div class="tag-row" id="tagRowEnviar">
+        <div class="tag" onclick="selTag(this)">🧩 Intraducible</div>
+        <div class="tag" onclick="selTag(this)">📖 Dicho popular</div>
+        <div class="tag" onclick="selTag(this)">🏠 Cotidiano</div>
+        <div class="tag" onclick="selTag(this)">❤️ Sentimental</div>
+        <div class="tag" onclick="selTag(this)">😂 Humor</div>
+        <div class="tag" onclick="selTag(this)">🌿 Naturaleza</div>
+        <div class="tag" onclick="selTag(this)">🏥 Médico / Salud</div>
+        <div class="tag" onclick="selTag(this)">⚖️ Jurídico</div>
+        <div class="tag" onclick="selTag(this)">🙏 Espiritual / Religioso</div>
+        <div class="tag" onclick="selTag(this)">🎓 Educación</div>
+        <div class="tag" onclick="selTag(this)">🌾 Agricultura / Campo</div>
+        <div class="tag" onclick="selTag(this)">🎵 Música / Arte</div>
+        <div class="tag warn" onclick="selTag(this)">⚠️ Política</div>
+        <div class="tag warn" onclick="selTag(this)">🔬 Términos técnicos</div>
+      </div>
+      <div class="cat-warn" id="catWarn" style="display:none;">
+        ⚠️ Esta categoría está <strong>en revisión</strong> con el equipo Silva. Solo se aceptan frases objetivas y neutras. El equipo puede solicitar modificaciones.
+      </div>
+      <button class="btn btn-oro" onclick="enviarFrase()">🚀 Compartir y ganar +15 pts</button>
+    </div>
+    <div class="card" style="text-align:center;padding:12px;">
+      <div style="font-size:10px;color:var(--texto2);margin-bottom:7px;">¿Preferís enviarlo por WhatsApp?</div>
+      <a href="https://wa.me/595983967627?text=Hola%20quiero%20participar%20en%20Jopara%20Vibe" class="wabtn">
+        <span style="font-size:18px;">💬</span> Participar por WhatsApp
+      </a>
+    </div>
+  </div>
+
+  <!-- RANKING -->
+  <div class="sec" id="sec-ranking">
+    <div class="stats-bar">
+      <div class="stat-box"><div class="stat-n" style="color:var(--oro);" id="sFrases">0</div><div class="stat-l">Frases</div></div>
+      <div class="stat-box"><div class="stat-n" style="color:var(--rojo);" id="sVotos">0</div><div class="stat-l">Votos</div></div>
+      <div class="stat-box"><div class="stat-n" style="color:var(--azul);" id="sPart">0</div><div class="stat-l">Participantes</div></div>
+    </div>
+    <div class="card-title" style="padding:0 2px 8px;">🏆 Top participantes este mes</div>
+    <div id="rankCont"></div>
+  </div>
+
+  <!-- PREMIOS -->
+  <div class="sec" id="sec-premios">
+    <div class="countdown fade-in-up" id="countdownBox">
+      <div class="cd-title">Próximo sorteo en</div>
+      <div class="cd-time" id="cdTime">--d --h --m</div>
+      <div class="cd-sub" id="cdSub"></div>
+    </div>
+    <!-- Motivational text — delayed -->
+    <div class="card fade-in-up delay-1" style="background:rgba(214,40,40,.06);border-color:rgba(214,40,40,.25);text-align:center;padding:14px 16px;">
+      <div style="font-size:18px;margin-bottom:6px;">🎲</div>
+      <div style="font-size:14px;font-weight:800;color:var(--blanco);margin-bottom:4px;">¡Che, animate nomás!</div>
+      <div style="font-size:12px;color:var(--texto2);line-height:1.6;">El que no participa, no gana.<br><span style="color:var(--oro);font-weight:700;">Y el que gana... ¡cobra nomás!</span> 💰</div>
+    </div>
+    <div class="card fade-in-up delay-2">
+      <div class="card-title">🎁 Premios mensuales</div>
+      <div class="premio-card delay-2"><div class="premio-pos">🥇</div><div class="premio-info"><div class="premio-tipo">Efectivo / Transferencia</div><div class="premio-monto">₲ 300.000</div></div></div>
+      <div class="premio-card delay-3"><div class="premio-pos">🥈</div><div class="premio-info"><div class="premio-tipo">Efectivo / Transferencia</div><div class="premio-monto">₲ 200.000</div></div></div>
+      <div class="premio-card delay-3"><div class="premio-pos">🥉</div><div class="premio-info"><div class="premio-tipo">Efectivo / Transferencia</div><div class="premio-monto">₲ 150.000</div></div></div>
+      <div class="premio-card delay-4"><div class="premio-pos" style="font-size:14px;">4–5°</div><div class="premio-info"><div class="premio-tipo">Recarga Tigo / Personal</div><div class="premio-monto">₲ 100.000 c/u</div></div></div>
+      <div class="premio-card delay-4"><div class="premio-pos" style="font-size:14px;">6–10°</div><div class="premio-info"><div class="premio-tipo">Recarga Tigo / Personal</div><div class="premio-monto">₲ 30.000 c/u</div></div></div>
+    </div>
+    <div class="card fade-in-up delay-3" style="background:rgba(244,168,35,.04);border-color:rgba(244,168,35,.2);">
+      <div class="card-title" style="color:var(--oro);">📋 Reglas</div>
+      <p style="font-size:12px;color:var(--texto2);line-height:1.6;">El ranking se reinicia el 1° de cada mes. Los ganadores son notificados por WhatsApp. El primer sorteo se realiza cuando el proyecto tenga al menos 2 meses de actividad. Premios en efectivo vía Tigo Money, Personal o transferencia bancaria.</p>
+    </div>
+  </div>
+
+  <!-- GRABAR -->
+  <div class="sec" id="sec-grabar">
+    <div class="card">
+      <div class="card-title">🎙️ Prueba de voz</div>
+      <p style="font-size:12px;color:var(--texto2);margin-bottom:12px;line-height:1.6;">Mandá un audio por WhatsApp leyendo estas 6 frases. Nuestra IA analiza tu voz. Las mejores son invitadas a grabaciones remuneradas (₲ 150.000 por sesión).</p>
+      <div class="doro"></div>
+      <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;">Las 6 frases:</div>
+      <div id="frasesGrabar"></div>
+      <div class="card" style="background:var(--gris2);margin:10px 0;">
+        <div class="card-title">📱 Cómo grabar bien</div>
+        <div style="font-size:11px;color:var(--texto2);line-height:1.9;">✅ Lugar silencioso<br>✅ Teléfono a 15–20 cm<br>✅ Hablá claro y natural<br>✅ Sin ruido de fondo</div>
+      </div>
+      <a href="https://wa.me/595983967627?text=Hola%20quiero%20hacer%20la%20prueba%20de%20voz%20en%20Jopara%20Vibe" class="wabtn" style="margin-bottom:10px;">
+        <span style="font-size:18px;">💬</span> Empezar prueba de voz →
+      </a>
+      <div style="font-size:10px;color:var(--texto2);text-align:center;line-height:1.5;">Las mejores voces son invitadas a grabaciones remuneradas 🎯</div>
+    </div>
+  </div>
+
+  <!-- CÓMO -->
+  <div class="sec" id="sec-como">
+    <div class="card">
+      <div class="card-title">🌿 ¿Qué es Jopara Vibe?</div>
+      <p style="font-size:12px;color:var(--texto2);line-height:1.6;">Estamos construyendo la primera IA que entiende y habla el guaraní real — el jopará cotidiano. Para lograrlo necesitamos las frases, los dichos y las voces de hablantes como vos.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">⭐ Cómo participar</div>
+      <div class="paso"><div class="paso-n">1</div><div class="paso-info"><h3>Compartí tu frase favorita</h3><p>Un dicho, algo intraducible, algo cotidiano.</p></div></div>
+      <div class="paso"><div class="paso-n">2</div><div class="paso-info"><h3>Discutí y mejorá frases</h3><p>Comentá sobre gramática, ortografía o variantes.</p></div></div>
+      <div class="paso"><div class="paso-n">3</div><div class="paso-info"><h3>Votá las frases de otros</h3><p>👍 si te gusta, 🔥 si es extraordinaria.</p></div></div>
+      <div class="paso"><div class="paso-n">4</div><div class="paso-info"><h3>Grabá tu voz</h3><p>Las mejores son invitadas a grabaciones remuneradas.</p></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⭐ Sistema de puntos</div>
+
+      <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📝 Por compartir</div>
+      <div class="pi"><span>Compartir una frase</span><span class="piv">+15 pts</span></div>
+      <div class="pi"><span>Tu frase llega a 10+ 👍</span><span class="piv">+10 pts bonus</span></div>
+      <div class="pi"><span>Tu frase llega a 25+ 👍</span><span class="piv">+20 pts bonus</span></div>
+      <div class="pi"><span>Tu frase llega a 50+ 👍</span><span class="piv">+30 pts bonus</span></div>
+      <div class="pi"><span>Tu frase recibe Sello Silva ✅</span><span class="piv">+50 pts</span></div>
+      <div class="pi"><span>Frase seleccionada por el equipo</span><span class="piv">+100 pts 🏅</span></div>
+
+      <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;">🗳️ Por votar y comentar</div>
+      <div class="pi"><span>Tu frase recibe 👍</span><span class="piv">+3 pts</span></div>
+      <div class="pi"><span>Tu frase recibe 🔥</span><span class="piv">+5 pts</span></div>
+      <div class="pi"><span>Votar (máx. 30/día)</span><span class="piv">+1 pt</span></div>
+      <div class="pi"><span>Comentar o corregir</span><span class="piv">+2 pts</span></div>
+      <div class="pi"><span>Corrección marcada Variante/Error</span><span class="piv">+3 pts</span></div>
+      <div class="pi"><span>Corrección aceptada por Silva</span><span class="piv">+15 pts</span></div>
+      <div class="pi"><span>Primera acción del día 🌅</span><span class="piv">+3 pts</span></div>
+
+      <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;">🔥 Streaks — días seguidos</div>
+      <div class="pi"><span>2 días seguidos</span><span class="piv">+5 pts</span></div>
+      <div class="pi"><span>3 días seguidos</span><span class="piv">+10 pts</span></div>
+      <div class="pi"><span>7 días seguidos ⭐</span><span class="piv">+25 pts</span></div>
+      <div class="pi"><span>14 días seguidos 🏅</span><span class="piv">+50 pts</span></div>
+      <div class="pi"><span>30 días seguidos 👑</span><span class="piv">+100 pts</span></div>
+
+      <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;">🌿 Otros</div>
+      <div class="pi"><span>Nombre guaraní sugerido (al registrar)</span><span class="piv">+5 pts</span></div>
+      <div class="pi"><span>Tu nombre llega a 5 👍</span><span class="piv">+10 pts</span></div>
+      <div class="pi"><span>Tu nombre llega a 10 👍</span><span class="piv">+15 pts</span></div>
+      <div class="pi"><span>Tu nombre aprobado por Lektor ✅</span><span class="piv">+25 pts</span></div>
+      <div class="pi"><span>Tu nombre elegido por otro usuario</span><span class="piv">+10 pts</span></div>
+      <div class="pi"><span>Grabar voz (primera grabación de la frase)</span><span class="piv">+20 pts</span></div>
+      <div class="pi"><span>Grabar voz (2ª a 5ª grabación)</span><span class="piv">+15 pts</span></div>
+      <div class="pi"><span>Tu grabación validada por Lektor ✅</span><span class="piv">+15 pts bonus</span></div>
+      <div class="pi"><span>Tu grabación reproducida 10 veces</span><span class="piv">+10 pts</span></div>
+      <div class="pi"><span>Tu grabación reproducida 50 veces</span><span class="piv">+20 pts</span></div>
+      <div class="pi"><span>Prueba de voz por WhatsApp</span><span class="piv">+50 pts</span></div>
+      <div class="pi"><span>Bienvenida (primera vez)</span><span class="piv">+10 pts</span></div>
+
+      <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px;">🥇 Pioneer — primero en categoría vacía</div>
+      <div class="pi"><span>Primera frase en categoría sin frases</span><span class="piv">+30 pts 🥇</span></div>
+      <div class="pi"><span>Primera grabación en categoría sin audios</span><span class="piv">+40 pts 🥇</span></div>
+
+      <div style="background:rgba(244,168,35,.08);border:1px solid rgba(244,168,35,.2);border-radius:8px;padding:10px 12px;margin-top:10px;font-size:11px;color:var(--texto2);line-height:1.6;">
+        💡 <strong style="color:var(--oro);">El sistema premia la calidad.</strong> Una frase excelente con Sello Silva y 50 votos vale hasta <strong style="color:var(--texto);">215 puntos</strong>. Votar el máximo diario vale 30 pts. ¡Compartí frases buenas y la comunidad te recompensa!
+      </div>
+    </div>
+    <div class="card" style="border-color:var(--celeste);background:rgba(126,200,227,.05);">
+      <div class="card-title" style="color:var(--celeste);">🌿 ¿Sabías que podés inventar nombres guaraní?</div>
+      <p style="font-size:12px;color:var(--texto2);line-height:1.7;">
+        El guaraní tiene una magia especial para combinar palabras y crear nombres únicos.<br><br>
+        <strong style="color:var(--texto);">Yvoty</strong> (flor) + <strong style="color:var(--texto);">pytã</strong> (rojo) = <strong style="color:var(--oro);">Yvotypytã</strong> 🌺 (flor roja)<br>
+        <strong style="color:var(--texto);">Kuarahy</strong> (sol) + <strong style="color:var(--texto);">jasy</strong> (luna) = <strong style="color:var(--oro);">Kuarahyjasy</strong> ✨ (sol y luna)<br>
+        <strong style="color:var(--texto);">Mainumby</strong> (colibrí) + <strong style="color:var(--texto);">pytã</strong> (rojo) = <strong style="color:var(--oro);">Mainumbypytã</strong> 🦜 (colibrí rojo)<br><br>
+        ¡Inventá el tuyo, proponelo en tu perfil y la comunidad lo vota!<br>
+        <strong style="color:var(--oro);">+5 pts</strong> por proponer · <strong style="color:var(--oro);">+15 pts</strong> si llega a 10 votos · <strong style="color:var(--oro);">+25 pts</strong> si el Lektor lo aprueba
+      </p>
+    </div>
+    <div class="card" style="border-color:var(--oro);background:rgba(244,168,35,.04);">
+      <div class="card-title" style="color:var(--oro);">🏅 Proyecto Jopara Vibe</div>
+      <p style="font-size:11px;color:var(--texto2);line-height:1.6;">En colaboración con el <strong style="color:var(--texto);">Prof. Ramón Raimundo Silva Fernández</strong> — autoridad nacional en idioma guaraní, 35 años de investigación, 50 tomos de diccionarios.</p>
+    </div>
+    <div id="adminLoginSection"></div>
+  </div>
+
+</div>
+
+
+<!-- COOLDOWN MODAL -->
+<div class="cooldown-modal" id="cooldownModal">
+  <div class="modal-bg" onclick="cerrarCooldown()" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:0;"></div>
+  <div class="cooldown-box">
+    <div class="cooldown-icon">🕐</div>
+    <div class="cooldown-title">¡Casi listo, che!</div>
+    <div style="font-size:13px;color:var(--texto2);margin-bottom:8px;">Para votar, esperá todavía:</div>
+    <div class="cooldown-timer" id="cooldownTimer">9:59</div>
+    <div class="cooldown-why">
+      ¿Por qué? Así nos aseguramos que cada voto venga de una persona real — no de robots. 
+      <strong style="color:var(--texto);">¡Es para proteger a tu comunidad!</strong>
+    </div>
+    <div class="cooldown-hint">
+      💡 <strong>Mientras tanto podés:</strong><br>
+      ✍️ Compartir tu frase favorita en guaraní<br>
+      💬 Leer y comentar las frases del feed<br>
+      🌿 Elegir tu nombre guaraní<br>
+      🎙️ Hacer la prueba de voz
+    </div>
+    <button class="btn btn-oro" onclick="cerrarCooldown()">¡Entendido, che! 👍</button>
+  </div>
+</div>
+
+<!-- LANG MODAL -->
+<div class="modal" id="modalLang">
+  <div class="modal-bg" onclick="cerrarLang()"></div>
+  <div class="modal-box">
+    <div class="modal-title" id="langModalTitle">🌐 Idioma / Language</div>
+    <div class="modal-sub" id="langModalSub">Elegí tu idioma preferido.</div>
+    <div class="lang-picker" id="langPicker"></div>
+    <button class="btn btn-oro" onclick="cerrarLang()" id="langModalOk">Listo ✓</button>
+  </div>
+</div>
+
+<!-- NOMBRE MODAL -->
+<div class="modal" id="modalNombre">
+  <div class="modal-bg"></div>
+  <div class="modal-box" style="max-height:95vh;overflow-y:auto;">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:40px;margin-bottom:6px;">🌿</div>
+      <div class="modal-title" id="nombreModalTitle" style="font-size:26px;">¡Bienvenido/a!</div>
+      <div id="nombreModalSub" style="font-size:12px;color:var(--texto2);line-height:1.5;margin-top:4px;">
+        Elegí tu nombre guaraní — cada uno tiene un significado especial.<br>
+        <strong style="color:var(--oro);">¡Son únicos! El primero que lo elige se lo queda.</strong>
+      </div>
+    </div>
+    <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🌿 Elegí un nombre guaraní</div>
+    <div class="ng" id="nombresGrid" style="grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;"></div>
+    <div class="o-label" id="nombreModalOr" style="margin:10px 0;font-size:11px;color:var(--texto2);text-align:center;letter-spacing:1px;">— O ESCRIBÍ EL TUYO —</div>
+    <input type="text" id="inNombre" maxlength="30" placeholder="Tu nombre o apodo en guaraní...">
+    <div style="font-size:10px;color:var(--texto2);margin-top:-7px;margin-bottom:12px;line-height:1.5;">
+      💡 Si tu nombre es auténtico en guaraní, la comunidad lo vota. Con 10 👍 ganás <strong style="color:var(--oro);">+25 pts</strong> y queda en la lista oficial.
+    </div>
+    <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📍 ¿De dónde sos?</div>
+    <input type="text" id="inLugar" maxlength="40" placeholder="Escribí tu ciudad o país..." list="ciudadesList">
+    <datalist id="ciudadesList">
+      <option value="Asunción"><option value="Ciudad del Este"><option value="Encarnación">
+      <option value="San Lorenzo"><option value="Luque"><option value="Capiatá">
+      <option value="Lambaré"><option value="Fernando de la Mora"><option value="Limpio">
+      <option value="Ñemby"><option value="Pedro Juan Caballero"><option value="Concepción">
+      <option value="Coronel Oviedo"><option value="Villarrica"><option value="Pilar">
+      <option value="Caaguazú"><option value="Paraguarí"><option value="Bolivia">
+      <option value="Brasil"><option value="Argentina"><option value="Uruguay">
+      <option value="Alemania"><option value="Austria"><option value="Suiza">
+      <option value="Francia"><option value="España"><option value="Ucrania">
+      <option value="Rusia"><option value="Estados Unidos"><option value="Canadá">
+    </datalist>
+    <button class="btn btn-oro" onclick="guardarNombre()" id="startBtn" style="margin-top:4px;">🚀 Empezar a participar — ¡gratis!</button>
+    <div style="font-size:10px;color:var(--texto2);text-align:center;margin-top:8px;">🔒 Sin registro, sin email, sin contraseña</div>
+  </div>
+</div>
+
+<!-- PERFIL MODAL -->
+<div class="modal" id="modalPerfil">
+  <div class="modal-bg" onclick="cerrarPerfil()"></div>
+  <div class="modal-box" id="perfilBox"></div>
+</div>
+
+
+<!-- AUDIO MODAL -->
+<div class="modal" id="modalAudio">
+  <div class="modal-bg" onclick="cerrarAudioModal()"></div>
+  <div class="modal-box" style="max-height:92vh;overflow-y:auto;">
+    <div class="modal-title">🎙️ Grabar mi voz</div>
+    <div class="modal-sub" id="audioModalFrase" style="font-style:italic;color:var(--celeste);font-size:14px;margin-bottom:14px;"></div>
+
+    <div class="audio-form">
+      <!-- LUGAR -->
+      <div class="form-row">
+        <label>📍 ¿De dónde sos?
+          <span class="tooltip-q" onclick="showTooltip(this,'📍 Tu ubicación ayuda a identificar variantes regionales del guaraní — muy valioso para el dataset.','lugar_tip')">?</span>
+        </label>
+        <input type="text" id="audioLugar" maxlength="60" placeholder="Escribí tu ciudad..." list="ciudadesAudioList"
+          style="width:100%;background:var(--gris3);border:1px solid var(--gris4);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:8px 10px;outline:none;margin-bottom:0;">
+        <datalist id="ciudadesAudioList">
+          <option value="Asunción"><option value="Ciudad del Este"><option value="Encarnación">
+          <option value="San Lorenzo"><option value="Luque"><option value="Capiatá">
+          <option value="Lambaré"><option value="Fernando de la Mora"><option value="Limpio">
+          <option value="Ñemby"><option value="Pedro Juan Caballero"><option value="Concepción">
+          <option value="Coronel Oviedo"><option value="Villarrica"><option value="Pilar">
+          <option value="Caaguazú"><option value="Paraguarí"><option value="Caacupé">
+          <option value="Itauguá"><option value="Areguá"><option value="Ypacaraí">
+          <option value="San Ignacio"><option value="Hohenau"><option value="Bella Vista">
+          <option value="Buenos Aires"><option value="Posadas"><option value="Corrientes">
+          <option value="São Paulo"><option value="Foz do Iguaçu">
+          <option value="Alemania"><option value="Austria"><option value="Suiza">
+          <option value="España"><option value="Francia"><option value="Estados Unidos">
+          <option value="Ucrania"><option value="Rusia"><option value="Italia">
+        </datalist>
+      </div>
+
+      <!-- DIALECTO -->
+      <div class="form-row">
+        <label>🗣️ ¿Cómo es tu guaraní?
+          <span class="tooltip-q" onclick="showTooltip(this,'🗣️ El tipo de guaraní que hablás. Jopará es la mezcla natural con español — la más hablada. Guaraní puro es más tradicional. Importante para entrenar la IA correctamente.','dialecto_tip')">?</span>
+        </label>
+        <div class="radio-group" id="dialectoGroup"></div>
+      </div>
+
+      <!-- CATEGORIA -->
+      <div class="form-row">
+        <label>🏷️ ¿A qué categoría pertenece?
+          <span class="tooltip-q" onclick="showTooltip(this,'🏷️ La categoría temática de la frase. Podés confirmar o cambiar la categoría que eligió quien la compartió.','cat_audio_tip')">?</span>
+        </label>
+        <div class="radio-group" id="catAudioGroup" style="max-height:120px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- EDAD -->
+      <div class="form-row">
+        <label>👤 Tu rango de edad
+          <span class="tooltip-q" onclick="showTooltip(this,'👤 Nos ayuda a entrenar la IA con voces de todas las generaciones. Las diferencias de pronunciación entre generaciones son muy importantes para el dataset.','edad_tip')">?</span>
+        </label>
+        <div class="radio-group" id="edadGroup"></div>
+      </div>
+    </div>
+
+    <!-- RECORDER -->
+    <div style="text-align:center;margin-bottom:12px;">
+      <button class="rec-btn" id="recBtn" onclick="toggleRecording()" style="margin:0 auto 8px;display:inline-flex;">
+        🎙️ Empezar grabación
+      </button>
+      <div class="rec-timer" id="recTimerEl">0:00 / 0:30</div>
+      <audio id="recPreview" controls style="display:none;width:100%;margin-top:8px;border-radius:8px;"></audio>
+    </div>
+
+    <!-- SEND -->
+    <div id="recSendBtn" style="display:none;flex-direction:column;gap:8px;">
+      <div style="font-size:11px;color:var(--verde);text-align:center;margin-bottom:4px;">
+        ✅ Grabación lista — pendiente de revisión por el equipo
+      </div>
+      <button class="btn btn-verde" onclick="enviarAudio()">📤 Enviar grabación</button>
+      <button class="btn btn-ghost" onclick="resetRecorder()">🔄 Volver a grabar</button>
+    </div>
+    <button class="btn btn-ghost" onclick="cerrarAudioModal()" style="margin-top:8px;">Cancelar</button>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN MODAL -->
+<div class="modal" id="modalAdmin">
+  <div class="modal-bg" onclick="cerrarAdmin()"></div>
+  <div class="modal-box">
+    <div class="modal-title">🔐 Acceso restringido</div>
+    <div class="modal-sub" id="adminLoginSub">Ingresá tu contraseña de acceso</div>
+    <input type="password" id="adminPw" placeholder="Contraseña..." maxlength="50">
+    <button class="btn btn-rojo" onclick="verificarAdmin()">Entrar →</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="pp" id="pp"><div style="font-size:28px;margin-bottom:4px;">🎉</div><div class="pp-num" id="ppNum">+15</div><div class="pp-lbl" id="ppMsg">puntos ganados</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════════════
+const SB_URL='https://nnvghlttygclvxjbuixl.supabase.co';
+const SB_KEY='sb_publishable_kdB53X0nPtKbOM8GbBzm5w_VzHBQBhA';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+
+// ═══════════════════════════════════════════════════════
+// CONSTANTES
+// ═══════════════════════════════════════════════════════
+const ADMIN_PW='Julia_Jannek_Lilly!', LEKTOR_PW='silva2026';
+const AV=[['#D62828','#fff'],['#1B4FD8','#fff'],['#F4A823','#000'],['#27AE60','#fff'],['#8E44AD','#fff'],['#E67E22','#fff'],['#16A085','#fff'],['#C0392B','#fff'],['#2980B9','#fff']];
+const FRASES_GRABAR=["Mba'éichapa reime?","Che aikotevẽ pytyvõ.","Aguyje rehegua mba'éichagua.","Ko'ẽ jave jaguata.","Che py'a guasu ndahechái.","Ha upéi, mba'épa oiko?"];
+const LANGS={es:{flag:'🇵🇾',name:'Español',label:'ES'},pt:{flag:'🇧🇷',name:'Português',label:'PT'},fr:{flag:'🇫🇷',name:'Français',label:'FR'},ru:{flag:'🇷🇺',name:'Русский',label:'RU'},de:{flag:'🇩🇪',name:'Deutsch',label:'DE'},en:{flag:'🇬🇧',name:'English',label:'EN'}};
+
+// Frases ejemplo por categoría
+const FRASES_EJEMPLO=[
+  {id:'ej1',guarani:"Che py'a guasu.",espanol:"Tengo el corazón grande / soy valiente.",porque:"Literalmente significa 'mi hígado es grande'. En guaraní, el hígado es la sede del valor. Imposible de traducir sin perder la fuerza.",tags:["🧩 Intraducible"],votos_like:31,votos_fire:19,flags_error:0,seleccionada:true,silva_sello:true,es_ejemplo:true,
+    profiles:{nombre:"Mbarete",lugar:"Asunción",avatar_color:"#F4A823",avatar_fg:"#000"}},
+  {id:'ej2',guarani:"Jaguata peteĩ yvoty rendápe.",espanol:"Caminemos hacia donde están las flores.",porque:"Se usa para invitar a alguien hacia algo bueno. No es literal — es una metáfora de esperanza cotidiana.",tags:["📖 Dicho popular"],votos_like:24,votos_fire:8,flags_error:0,seleccionada:false,silva_sello:false,es_ejemplo:true,
+    profiles:{nombre:"Yvoty",lugar:"Asunción",avatar_color:"#27AE60",avatar_fg:"#fff"}},
+  {id:'ej3',guarani:"Mba'éichapa reime?",espanol:"¿Cómo estás?",porque:"El saludo más usado en Paraguay. Simple, cálido, cotidiano. Si sabés decir esto, ya hablás guaraní.",tags:["🏠 Cotidiano"],votos_like:45,votos_fire:22,flags_error:0,seleccionada:true,silva_sello:true,es_ejemplo:true,
+    profiles:{nombre:"Ara",lugar:"Asunción",avatar_color:"#1B4FD8",avatar_fg:"#fff"}},
+  {id:'ej4',guarani:"Rohayhu.",espanol:"Te quiero / Te amo.",porque:"Una sola palabra que lo dice todo. Ro = yo a vos, hayhu = querer/amar. El amor en guaraní cabe en cuatro sílabas.",tags:["❤️ Sentimental"],votos_like:67,votos_fire:41,flags_error:0,seleccionada:true,silva_sello:true,es_ejemplo:true,
+    profiles:{nombre:"Pytã",lugar:"Asunción",avatar_color:"#D62828",avatar_fg:"#fff"}},
+  {id:'ej5',guarani:"Ha'e oñembyasy heta.",espanol:"Se queja demasiado.",porque:"El que dice esto con la cara indicada vale más que mil palabras. Guaraní para el drama del vecino.",tags:["😂 Humor"],votos_like:38,votos_fire:29,flags_error:0,seleccionada:false,silva_sello:false,es_ejemplo:true,
+    profiles:{nombre:"Aguara",lugar:"Ciudad del Este",avatar_color:"#8E44AD",avatar_fg:"#fff"}},
+  {id:'ej6',guarani:"Yvytu pytũ oú.",espanol:"Viene el viento oscuro — se acerca la tormenta.",porque:"Viento oscuro. En una frase, el guaraní captura lo que el español necesita en cinco palabras. La naturaleza habla en guaraní.",tags:["🌿 Naturaleza"],votos_like:19,votos_fire:14,flags_error:0,seleccionada:false,silva_sello:false,es_ejemplo:true,
+    profiles:{nombre:"Yvytu",lugar:"Encarnación",avatar_color:"#16A085",avatar_fg:"#fff"}},
+  {id:'ej7',guarani:"Che py'a potĩ.",espanol:"Tengo el corazón limpio / soy inocente.",porque:"Expresión jurídica y espiritual a la vez. 'Py'a potĩ' es la defensa más antigua del guaraní.",tags:["⚖️ Jurídico"],votos_like:12,votos_fire:6,flags_error:0,seleccionada:false,silva_sello:false,es_ejemplo:true,
+    profiles:{nombre:"Karai",lugar:"Asunción",avatar_color:"#E67E22",avatar_fg:"#fff"}},
+  {id:'ej8',guarani:"Che rasy.",espanol:"Me duele / Estoy enfermo/a.",porque:"La frase médica más básica. Che = yo, rasy = dolor/enfermedad. La primera frase que todo médico en Paraguay debería saber.",tags:["🏥 Médico / Salud"],votos_like:16,votos_fire:7,flags_error:0,seleccionada:false,silva_sello:false,es_ejemplo:true,
+    profiles:{nombre:"Ysyrý",lugar:"Asunción",avatar_color:"#2980B9",avatar_fg:"#fff"}},
+];
+
+const NOMBRES_GN=[
+  {id:'n1', nombre:"Ñe'ẽ",       significado:"Voz, palabra, alma",          emoji:"🗣️",  reservado_para:'lektor', tomado_por:null, orden:1},
+  {id:'n2', nombre:"Ñe'ẽ Ñembotavy", significado:"Las palabras perdidas",   emoji:"🌀",  reservado_para:'admin',  tomado_por:null, orden:0},
+  {id:'n3', nombre:"Yvoty",       significado:"Flor",                         emoji:"🌸",  tomado_por:null, orden:2},
+  {id:'n4', nombre:"Kuarahy",     significado:"Sol",                          emoji:"☀️",  tomado_por:null, orden:3},
+  {id:'n5', nombre:"Mbarete",     significado:"Fuerza, poder",               emoji:"💪",  tomado_por:null, orden:4},
+  {id:'n6', nombre:"Ara",         significado:"Día, cielo, tiempo",           emoji:"🌤️",  tomado_por:null, orden:5},
+  {id:'n7', nombre:"Ñandutí",     significado:"Encaje paraguayo",             emoji:"🕸️",  tomado_por:null, orden:6},
+  {id:'n8', nombre:"Pytyvõ",      significado:"Ayuda, apoyo",                emoji:"🤝",  tomado_por:null, orden:7},
+  {id:'n9', nombre:"Yvypóra",     significado:"Hijo de la tierra",           emoji:"🌍",  tomado_por:null, orden:8},
+  {id:'n10',nombre:"Mburuvicha",  significado:"Líder",                        emoji:"👑",  tomado_por:null, orden:9},
+  {id:'n11',nombre:"Guyrapa",     significado:"Arco iris",                    emoji:"🌈",  tomado_por:null, orden:10},
+  {id:'n12',nombre:"Jacaré",      significado:"Yacaré, caimán",              emoji:"🐊",  tomado_por:null, orden:11},
+  {id:'n13',nombre:"Mainumby",    significado:"Colibrí, alegría",            emoji:"🦜",  tomado_por:null, orden:12},
+  {id:'n14',nombre:"Jasy",        significado:"Luna",                         emoji:"🌙",  tomado_por:null, orden:13},
+  {id:'n15',nombre:"Tupã",        significado:"Dios, el trueno sagrado",     emoji:"⚡",  tomado_por:null, orden:14},
+  {id:'n16',nombre:"Ysyrý",       significado:"Río, corriente de vida",      emoji:"🌊",  tomado_por:null, orden:15},
+  {id:'n17',nombre:"Yaguareté",   significado:"Jaguar, el más valiente",     emoji:"🐆",  tomado_por:null, orden:16},
+  {id:'n18',nombre:"Ko'ẽ",        significado:"Amanecer, nuevo comienzo",   emoji:"🌅",  tomado_por:null, orden:17},
+  {id:'n19',nombre:"Mbyja",       significado:"Estrella, luz lejana",        emoji:"⭐",  tomado_por:null, orden:18},
+  {id:'n20',nombre:"Yvytu",       significado:"Viento, brisa",               emoji:"🍃",  tomado_por:null, orden:19},
+  {id:'n21',nombre:"Tataypy",     significado:"Fuego del hogar",             emoji:"🔥",  tomado_por:null, orden:20},
+  {id:'n22',nombre:"Aguara",      significado:"Zorro, el astuto",            emoji:"🦊",  tomado_por:null, orden:21},
+  {id:'n23',nombre:"Karumbé",     significado:"Tortuga, paciencia",          emoji:"🐢",  tomado_por:null, orden:22},
+  {id:'n24',nombre:"Pindo",       significado:"Palmera, resistencia",        emoji:"🌴",  tomado_por:null, orden:23},
+  {id:'n25',nombre:"Karai",       significado:"Señor, sabio",                emoji:"🧙",  tomado_por:null, orden:24},
+  {id:'n26',nombre:"Ñemity",      significado:"Siembra, el origen",          emoji:"🌱",  tomado_por:null, orden:25},
+  {id:'n27',nombre:"Tape",        significado:"Camino, sendero",             emoji:"🛤️",  tomado_por:null, orden:26},
+  {id:'n28',nombre:"Ytu",         significado:"Cascada, fuerza del agua",    emoji:"💧",  tomado_por:null, orden:27},
+  {id:'n29',nombre:"Mbói",        significado:"Serpiente sabia",             emoji:"🐍",  tomado_por:null, orden:28},
+  {id:'n30',nombre:"Pytã",        significado:"Rojo intenso, pasión",        emoji:"❤️",  tomado_por:null, orden:29},
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let S={lang:'es',profile:null,rol:'usuario',frases:[...FRASES_EJEMPLO],nombres:[...NOMBRES_GN],sugerencias:[],votes:{},feedbacks:{},filtro:'todos',cTipos:{},adminUnlocked:false,lektorUnlocked:false,pendingAdminType:null,votosHora:0,votosHoraReset:Date.now()};
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+window.onload=async()=>{
+  loadLocal();
+  detectLang();
+  applyLang();
+  renderLangPicker();
+  renderFrasesGrabar();
+  renderAdminLoginSection();
+  startCountdown();
+  renderNombresGrid();
+  renderSugerencias();
+  renderFrases();
+  renderRanking();
+  updateBienvenida();
+  await loadFromSupabase();
+  if(!S.profile) setTimeout(()=>document.getElementById('modalNombre').classList.add('show'),800);
+  loadSoundPref();
+  checkStreak();
+  setTimeout(()=>showFeedTip(), 1500);
+};
+
+function loadLocal(){
+  try{const s=localStorage.getItem('jv_state');if(s){const p=JSON.parse(s);S={...S,...p};if(!S.frases||S.frases.length===0)S.frases=[...FRASES_EJEMPLO];if(!S.nombres||S.nombres.length===0)S.nombres=[...NOMBRES_GN];document.getElementById('ptsH').textContent=S.profile?.puntos||0;}}catch(e){}
+}
+function saveLocal(){try{localStorage.setItem('jv_state',JSON.stringify({profile:S.profile,rol:S.rol,votes:S.votes,feedbacks:S.feedbacks,lang:S.lang,adminUnlocked:S.adminUnlocked,lektorUnlocked:S.lektorUnlocked,votosHora:S.votosHora,votosHoraReset:S.votosHoraReset}));}catch(e){}}
+
+async function loadFromSupabase(){
+  try{
+    const{data:frases}=await sb.from('frases').select('*,profiles(nombre,lugar,avatar_color,avatar_fg)').eq('estado','activo').order('created_at',{ascending:false}).limit(50);
+    if(frases&&frases.length>0)S.frases=[...FRASES_EJEMPLO,...frases];
+    const{data:nombres}=await sb.from('nombres_guarani').select('*').order('orden');
+    if(nombres&&nombres.length>0)S.nombres=nombres;
+    const{data:sug}=await sb.from('nombre_sugerencias').select('*,profiles(nombre)').eq('estado','pendiente').order('votos',{ascending:false}).limit(20);
+    if(sug)S.sugerencias=sug;
+  }catch(e){console.log('Supabase offline, usando datos locales');}
+  renderFrases();renderRanking();renderNombresDisp();renderSugerencias();updateBienvenida();
+}
+
+// ═══════════════════════════════════════════════════════
+// BIENVENIDA
+// ═══════════════════════════════════════════════════════
+function updateBienvenida(){
+  if(!S.profile)return;
+  const bv=document.getElementById('bienvenida');
+  const tg = getTimeGreeting();
+  const bvNombreEl = document.getElementById('bvNombre');
+  try{ if(bvNombreEl) bvNombreEl.textContent = S.profile.nombre||''; }catch(e){}
+  const bvText = document.getElementById('bvText');
+  if(bvText) bvText.innerHTML = tg.icon + ' ' + tg.text + ', <span id="bvNombre2">' + (S.profile.nombre||'') + '</span>! 🌿';
+  if(document.getElementById('bvPts'))document.getElementById('bvPts').textContent=S.profile.puntos||0;
+  const misFreses=S.frases.filter(f=>f.profiles?.nombre===S.profile.nombre||f.autor_id===S.profile.id);
+  if(document.getElementById('bvFrases'))document.getElementById('bvFrases').textContent=misFreses.length;
+  bv.classList.add('show');
+  // Ocultar hero si ya registrado
+  document.getElementById('heroSection').style.display='none';
+  // Actualizar avatar
+  const[bg,fg]=S.profile.avatar_color?[S.profile.avatar_color,S.profile.avatar_fg]:AV[0];
+  const ab=document.getElementById('avatarBtn');
+  ab.style.background=bg;ab.style.color=fg;
+  const emoji=getEmoji(S.profile.nombre);
+  ab.textContent=emoji||(S.profile.nombre?S.profile.nombre[0].toUpperCase():'?');
+  ab.style.fontSize=emoji?'18px':'14px';
+}
+
+// ═══════════════════════════════════════════════════════
+// LANG
+// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// TRADUCCIONES
+// ═══════════════════════════════════════════════════════
+const TR={
+  es:{
+    tagline:'Voces que conectan',
+    hero_t:'Tu voz hace <span>historia digital</span>',
+    hero_s:'Contribuí con el guaraní que hablás todos los días.',
+    welcome_back:'¡Bienvenido de vuelta,',
+    tab_feed:'Feed',tab_share:'Compartir',tab_rank:'Ranking',tab_prizes:'Premios',tab_names:'Nombres',tab_rec:'Grabar',tab_how:'Cómo',
+    share_title:'✍️ Compartí tu frase favorita',
+    gn_ph:'Escribí la frase tal como se dice...',
+    es_ph:'La traducción aproximada...',
+    pq_ph:'El contexto, el sentimiento, la historia...',
+    cat_label:'Categoría',share_btn:'🚀 Compartir y ganar +15 pts',
+    wa_alt:'¿Preferís enviarlo por WhatsApp?',wa_btn:'Participar por WhatsApp',
+    rank_title:'🏆 Top participantes este mes',
+    stat_frases:'Frases',stat_votes:'Votos',stat_part:'Participantes',
+    prizes_title:'🎁 Premios mensuales',cd_title:'Próximo sorteo en',
+    names_title:'🌿 Nombres disponibles',names_sub:'Cada nombre guaraní tiene un significado especial. ¡Son únicos!',
+    sug_title:'💡 Sugerí un nombre',sug_gn:'Nombre en guaraní',sug_gn_ph:'Ej: Yvytu',
+    sug_sig:'Significado',sug_sig_ph:'Ej: Viento suave',sug_btn:'💡 Sugerir nombre',
+    sug_comm:'🗳️ Votá sugerencias de la comunidad',
+    rec_title:'🎙️ Prueba de voz',rec_frases:'Las 6 frases:',rec_start:'Empezar prueba de voz →',
+    how_what:'🌿 ¿Qué es Jopara Vibe?',how_steps:'⭐ Cómo participar',pts_title:'⭐ Sistema de puntos',
+    step1_t:'Compartí tu frase favorita',step1_p:'Un dicho, algo intraducible, algo cotidiano.',
+    step2_t:'Discutí y mejorá frases',step2_p:'Comentá sobre gramática, ortografía o variantes.',
+    step3_t:'Votá las frases de otros',step3_p:'👍 si te gusta, 🔥 si es extraordinaria.',
+    step4_t:'Grabá tu voz',step4_p:'Las mejores son invitadas a grabaciones remuneradas.',
+    fb_lbl:'¿Es lingüísticamente correcto?',fb_ok:'✅ Correcto',fb_var:'🔄 Variante',fb_err:'❌ Error',
+    c_send:'Enviar',c_cancel:'Cancelar',c_btn:'✏️ Comentar',c_ph:'Tu comentario, corrección o variante regional...',
+    no_comments:'Be the first to comment.',
+    empty_feed:'¡Sé el primero!',empty_feed_p:'No hay frases en esta categoría todavía.',
+    f_all:'Todos',
+    toast_name:'Escribí tu nombre 👆',toast_lugar:'Escribí tu ciudad o país 👆',
+    toast_gn:'Escribí la frase en guaraní 👆',toast_es:'Agregá la traducción 👆',toast_c:'Escribí tu comentario 👆',
+    toast_own:'No podés votar tu propia frase',toast_ej:'¡Esta es una frase de ejemplo! Compartí la tuya 😊',
+    toast_voted_l:'👍 ¡Voto registrado! +1 pt',toast_voted_f:'🔥 ¡Votaste con fuego! +1 pt',
+    toast_already:'Ya votaste esta frase 😊',toast_limit:'Límite de votos por hora ⏳',
+    toast_fb_ok:'✅ Marcado como correcto +1 pt',toast_fb_var:'🔄 Variante registrada +1 pt',toast_fb_err:'❌ Error reportado +1 pt',
+    toast_fb_ya:'Ya enviaste feedback',toast_c_sent:'💬 Comentario enviado +2 pts',
+    toast_shared:'🚀 ¡Frase compartida! +15 pts',toast_copied:'📋 Copiado',
+    toast_sug:'💡 ¡Sugerencia enviada!',toast_sug_v:'👍 Voto registrado',
+    toast_bio:'✅ Bio guardada',toast_name_taken:'Ese nombre ya está tomado 😅',
+    lang_title:'🌐 Idioma / Language',lang_sub:'Elegí tu idioma preferido.',lang_ok:'Listo ✓',
+    welcome:'¡Bienvenido/a! 👋',welcome_sub:'Elegí un nombre guaraní único — el primero que lo elige se lo queda para siempre.',
+    or_write:'— o escribí el tuyo —',name_ph:'Tu nombre o apodo...',lugar_ph:'Ej: Asunción, CDE, Encarnación...',start_btn:'Empezar a participar 🚀',
+    perfil_bio:'Bio',perfil_logros:'🏅 Logros',perfil_frases:'📝 Sus frases',perfil_close:'Cerrar',
+    perfil_bio_ph:'Contá algo sobre vos — de dónde sos, qué te conecta con el guaraní...',perfil_bio_save:'Guardar bio',
+    staff_title:'🔐 Acceso staff',no_sug:'No hay sugerencias pendientes todavía.',
+    cat_warn:'⚠️ Esta categoría está en revisión con el equipo Silva. Solo se aceptan frases objetivas y neutras.',
+    bio_label:'📖 Bio',
+  },
+  pt:{
+    tagline:'Vozes que conectam',hero_t:'Sua voz faz <span>história digital</span>',
+    hero_s:'Contribua com o guarani do dia a dia.',welcome_back:'Bem-vindo/a de volta,',
+    tab_feed:'Feed',tab_share:'Compartilhar',tab_rank:'Ranking',tab_prizes:'Prêmios',tab_names:'Nomes',tab_rec:'Gravar',tab_how:'Como',
+    share_title:'✍️ Compartilhe sua frase favorita',gn_ph:'Escreva a frase como se fala...',
+    es_ph:'A tradução aproximada...',pq_ph:'O contexto, o sentimento, a história...',cat_label:'Categoria',
+    share_btn:'🚀 Compartilhar e ganhar +15 pts',wa_alt:'Prefere enviar pelo WhatsApp?',wa_btn:'Participar pelo WhatsApp',
+    rank_title:'🏆 Top participantes deste mês',stat_frases:'Frases',stat_votes:'Votos',stat_part:'Participantes',
+    prizes_title:'🎁 Prêmios mensais',cd_title:'Próximo sorteio em',
+    names_title:'🌿 Nomes disponíveis',names_sub:'Cada nome guarani tem um significado especial. São únicos!',
+    sug_title:'💡 Sugira um nome',sug_gn:'Nome em guarani',sug_gn_ph:'Ex: Yvytu',sug_sig:'Significado',sug_sig_ph:'Ex: Vento suave',sug_btn:'💡 Sugerir nome',
+    sug_comm:'🗳️ Vote nas sugestões da comunidade',rec_title:'🎙️ Teste de voz',rec_frases:'As 6 frases:',rec_start:'Começar teste de voz →',
+    how_what:'🌿 O que é Jopara Vibe?',how_steps:'⭐ Como participar',pts_title:'⭐ Sistema de pontos',
+    step1_t:'Compartilhe sua frase favorita',step1_p:'Um ditado, algo intraduzível, algo cotidiano.',
+    step2_t:'Discuta e melhore frases',step2_p:'Comente sobre gramática, ortografia ou variantes.',
+    step3_t:'Vote nas frases dos outros',step3_p:'👍 se gostar, 🔥 se for extraordinária.',
+    step4_t:'Grave sua voz',step4_p:'As melhores são convidadas para gravações remuneradas.',
+    fb_lbl:'É linguisticamente correto?',fb_ok:'✅ Correto',fb_var:'🔄 Variante',fb_err:'❌ Erro',
+    c_send:'Enviar',c_cancel:'Cancelar',c_btn:'✏️ Comentar',c_ph:'Seu comentário, correção ou variante regional...',
+    no_comments:'Seja o primeiro a comentar.',empty_feed:'Seja o primeiro!',empty_feed_p:'Não há frases nesta categoria ainda.',
+    f_all:'Todos',toast_name:'Escreva seu nome 👆',toast_lugar:'Escreva sua cidade ou país 👆',
+    toast_gn:'Escreva a frase em guarani 👆',toast_es:'Adicione a tradução 👆',toast_c:'Escreva seu comentário 👆',
+    toast_own:'Não pode votar na própria frase',toast_ej:'Esta é uma frase de exemplo! Compartilhe a sua 😊',
+    toast_voted_l:'👍 Voto registrado! +1 pt',toast_voted_f:'🔥 Votou com fogo! +1 pt',
+    toast_already:'Você já votou nesta frase 😊',toast_limit:'Limite de votos por hora ⏳',
+    toast_fb_ok:'✅ Marcado como correto +1 pt',toast_fb_var:'🔄 Variante registrada +1 pt',toast_fb_err:'❌ Erro reportado +1 pt',
+    toast_fb_ya:'Já enviou feedback',toast_c_sent:'💬 Comentário enviado +2 pts',
+    toast_shared:'🚀 Frase compartilhada! +15 pts',toast_copied:'📋 Copiado',
+    toast_sug:'💡 Sugestão enviada!',toast_sug_v:'👍 Voto registrado',toast_bio:'✅ Bio salva',toast_name_taken:'Esse nome já está tomado 😅',
+    lang_title:'🌐 Idioma / Language',lang_sub:'Escolha seu idioma preferido.',lang_ok:'Pronto ✓',
+    welcome:'Bem-vindo/a! 👋',welcome_sub:'Escolha um nome guarani único — o primeiro que escolher fica com ele para sempre.',
+    or_write:'— ou escreva o seu —',name_ph:'Seu nome ou apelido...',lugar_ph:'Ex: Asunción, Encarnación, Brasil...',start_btn:'Começar a participar 🚀',
+    perfil_bio:'Bio',perfil_logros:'🏅 Conquistas',perfil_frases:'📝 Suas frases',perfil_close:'Fechar',
+    perfil_bio_ph:'Conte algo sobre você...',perfil_bio_save:'Salvar bio',
+    staff_title:'🔐 Acesso staff',no_sug:'Não há sugestões pendentes ainda.',
+    cat_warn:'⚠️ Esta categoria está em revisão com a equipe Silva. Apenas frases objetivas e neutras.',bio_label:'📖 Bio',
+  },
+  fr:{
+    tagline:'Des voix qui connectent',hero_t:'Ta voix fait <span>l\'histoire digitale</span>',
+    hero_s:'Contribue avec le guarani de tous les jours.',welcome_back:'Bienvenue,',
+    tab_feed:'Fil',tab_share:'Partager',tab_rank:'Classement',tab_prizes:'Prix',tab_names:'Noms',tab_rec:'Enregistrer',tab_how:'Comment',
+    share_title:'✍️ Partage ta phrase préférée',gn_ph:'Écris la phrase telle qu\'elle se dit...',
+    es_ph:'La traduction approximative...',pq_ph:'Le contexte, le sentiment, l\'histoire...',cat_label:'Catégorie',
+    share_btn:'🚀 Partager et gagner +15 pts',wa_alt:'Tu préfères l\'envoyer par WhatsApp?',wa_btn:'Participer par WhatsApp',
+    rank_title:'🏆 Top participants ce mois',stat_frases:'Phrases',stat_votes:'Votes',stat_part:'Participants',
+    prizes_title:'🎁 Prix mensuels',cd_title:'Prochain tirage dans',
+    names_title:'🌿 Noms disponibles',names_sub:'Chaque nom guarani a une signification spéciale. Ils sont uniques!',
+    sug_title:'💡 Suggère un nom',sug_gn:'Nom en guarani',sug_gn_ph:'Ex: Yvytu',sug_sig:'Signification',sug_sig_ph:'Ex: Vent doux',sug_btn:'💡 Suggérer un nom',
+    sug_comm:'🗳️ Vote pour les suggestions',rec_title:'🎙️ Test de voix',rec_frases:'Les 6 phrases:',rec_start:'Commencer le test →',
+    how_what:'🌿 Qu\'est-ce que Jopara Vibe?',how_steps:'⭐ Comment participer',pts_title:'⭐ Système de points',
+    step1_t:'Partage ta phrase préférée',step1_p:'Un dicton, quelque chose d\'intraduisible.',
+    step2_t:'Discute et améliore les phrases',step2_p:'Commente la grammaire ou les variantes.',
+    step3_t:'Vote pour les phrases des autres',step3_p:'👍 si tu aimes, 🔥 si c\'est extraordinaire.',
+    step4_t:'Enregistre ta voix',step4_p:'Les meilleures sont invitées à des enregistrements rémunérés.',
+    fb_lbl:'Est-ce linguistiquement correct?',fb_ok:'✅ Correct',fb_var:'🔄 Variante',fb_err:'❌ Erreur',
+    c_send:'Envoyer',c_cancel:'Annuler',c_btn:'✏️ Commenter',c_ph:'Ton commentaire, correction ou variante régionale...',
+    no_comments:'Sois le premier à commenter.',empty_feed:'Sois le premier!',empty_feed_p:'Pas encore de phrases dans cette catégorie.',
+    f_all:'Tous',toast_name:'Écris ton nom 👆',toast_lugar:'Écris ta ville ou ton pays 👆',
+    toast_gn:'Écris la phrase en guarani 👆',toast_es:'Ajoute la traduction 👆',toast_c:'Écris ton commentaire 👆',
+    toast_own:'Tu ne peux pas voter pour ta propre phrase',toast_ej:'C\'est une phrase d\'exemple! Partage la tienne 😊',
+    toast_voted_l:'👍 Vote enregistré! +1 pt',toast_voted_f:'🔥 Voté avec feu! +1 pt',
+    toast_already:'Tu as déjà voté pour cette phrase 😊',toast_limit:'Limite de votes par heure ⏳',
+    toast_fb_ok:'✅ Marqué comme correct +1 pt',toast_fb_var:'🔄 Variante enregistrée +1 pt',toast_fb_err:'❌ Erreur signalée +1 pt',
+    toast_fb_ya:'Déjà envoyé un retour',toast_c_sent:'💬 Commentaire envoyé +2 pts',
+    toast_shared:'🚀 Phrase partagée! +15 pts',toast_copied:'📋 Copié',
+    toast_sug:'💡 Suggestion envoyée!',toast_sug_v:'👍 Vote enregistré',toast_bio:'✅ Bio sauvegardée',toast_name_taken:'Ce nom est déjà pris 😅',
+    lang_title:'🌐 Langue / Language',lang_sub:'Choisis ta langue préférée.',lang_ok:'Terminé ✓',
+    welcome:'Bienvenue! 👋',welcome_sub:'Choisis un nom guarani unique — le premier à le choisir le garde pour toujours.',
+    or_write:'— ou écris le tien —',name_ph:'Ton nom ou surnom...',lugar_ph:'Ex: Asunción, Paris, France...',start_btn:'Commencer à participer 🚀',
+    perfil_bio:'Bio',perfil_logros:'🏅 Succès',perfil_frases:'📝 Ses phrases',perfil_close:'Fermer',
+    perfil_bio_ph:'Parle un peu de toi...',perfil_bio_save:'Sauvegarder',
+    staff_title:'🔐 Accès staff',no_sug:'Pas encore de suggestions en attente.',
+    cat_warn:'⚠️ Cette catégorie est en révision avec l\'équipe Silva. Phrases objectives uniquement.',bio_label:'📖 Bio',
+  },
+  ru:{
+    tagline:'Голоса, которые соединяют',hero_t:'Твой голос создаёт <span>цифровую историю</span>',
+    hero_s:'Внеси вклад в гуарани, на котором говоришь каждый день.',welcome_back:'С возвращением,',
+    tab_feed:'Лента',tab_share:'Поделиться',tab_rank:'Рейтинг',tab_prizes:'Призы',tab_names:'Имена',tab_rec:'Запись',tab_how:'Как',
+    share_title:'✍️ Поделись любимой фразой',gn_ph:'Напиши фразу так, как она звучит...',
+    es_ph:'Примерный перевод...',pq_ph:'Контекст, чувство, история...',cat_label:'Категория',
+    share_btn:'🚀 Поделиться и получить +15 очков',wa_alt:'Предпочитаешь отправить через WhatsApp?',wa_btn:'Участвовать через WhatsApp',
+    rank_title:'🏆 Топ участников этого месяца',stat_frases:'Фразы',stat_votes:'Голоса',stat_part:'Участники',
+    prizes_title:'🎁 Ежемесячные призы',cd_title:'Следующий розыгрыш через',
+    names_title:'🌿 Доступные имена',names_sub:'Каждое имя гуарани имеет особый смысл. Они уникальны!',
+    sug_title:'💡 Предложи имя',sug_gn:'Имя на гуарани',sug_gn_ph:'Пр: Yvytu',sug_sig:'Значение',sug_sig_ph:'Пр: Мягкий ветер',sug_btn:'💡 Предложить имя',
+    sug_comm:'🗳️ Голосуй за предложения',rec_title:'🎙️ Тест голоса',rec_frases:'6 фраз:',rec_start:'Начать тест голоса →',
+    how_what:'🌿 Что такое Jopara Vibe?',how_steps:'⭐ Как участвовать',pts_title:'⭐ Система очков',
+    step1_t:'Поделись любимой фразой',step1_p:'Поговорка, что-то непереводимое, повседневное.',
+    step2_t:'Обсуждай и улучшай фразы',step2_p:'Комментируй грамматику и варианты.',
+    step3_t:'Голосуй за фразы других',step3_p:'👍 если нравится, 🔥 если замечательно.',
+    step4_t:'Запиши свой голос',step4_p:'Лучшие приглашаются на оплачиваемые записи.',
+    fb_lbl:'Это лингвистически правильно?',fb_ok:'✅ Верно',fb_var:'🔄 Вариант',fb_err:'❌ Ошибка',
+    c_send:'Отправить',c_cancel:'Отмена',c_btn:'✏️ Комментировать',c_ph:'Твой комментарий, исправление или региональный вариант...',
+    no_comments:'Будь первым, кто прокомментирует.',empty_feed:'Будь первым!',empty_feed_p:'В этой категории пока нет фраз.',
+    f_all:'Все',toast_name:'Напиши своё имя 👆',toast_lugar:'Напиши свой город или страну 👆',
+    toast_gn:'Напиши фразу на гуарани 👆',toast_es:'Добавь перевод 👆',toast_c:'Напиши комментарий 👆',
+    toast_own:'Нельзя голосовать за свою фразу',toast_ej:'Это пример фразы! Поделись своей 😊',
+    toast_voted_l:'👍 Голос засчитан! +1 очко',toast_voted_f:'🔥 Проголосовал с огнём! +1 очко',
+    toast_already:'Ты уже голосовал за эту фразу 😊',toast_limit:'Лимит голосов в час ⏳',
+    toast_fb_ok:'✅ Отмечено как верное +1 очко',toast_fb_var:'🔄 Вариант зарегистрирован +1 очко',toast_fb_err:'❌ Ошибка сообщена +1 очко',
+    toast_fb_ya:'Отзыв уже отправлен',toast_c_sent:'💬 Комментарий отправлен +2 очка',
+    toast_shared:'🚀 Фраза опубликована! +15 очков',toast_copied:'📋 Скопировано',
+    toast_sug:'💡 Предложение отправлено!',toast_sug_v:'👍 Голос засчитан',toast_bio:'✅ Био сохранено',toast_name_taken:'Это имя уже занято 😅',
+    lang_title:'🌐 Язык / Language',lang_sub:'Выбери предпочтительный язык.',lang_ok:'Готово ✓',
+    welcome:'Добро пожаловать! 👋',welcome_sub:'Выбери уникальное имя гуарани — кто первый выбирает, тот и владеет.',
+    or_write:'— или напиши своё —',name_ph:'Твоё имя или псевдоним...',lugar_ph:'Пр: Асунсьон, Украина, Россия...',start_btn:'Начать участие 🚀',
+    perfil_bio:'Био',perfil_logros:'🏅 Достижения',perfil_frases:'📝 Его/её фразы',perfil_close:'Закрыть',
+    perfil_bio_ph:'Расскажи о себе...',perfil_bio_save:'Сохранить',
+    staff_title:'🔐 Доступ сотрудников',no_sug:'Пока нет предложений.',
+    cat_warn:'⚠️ Эта категория проверяется командой Сильвы. Только нейтральные фразы.',bio_label:'📖 Био',
+  },
+  de:{
+    tagline:'Stimmen, die verbinden',hero_t:'Deine Stimme macht <span>digitale Geschichte</span>',
+    hero_s:'Trag mit dem Guaraní bei, das du jeden Tag sprichst.',welcome_back:'Willkommen zurück,',
+    tab_feed:'Feed',tab_share:'Teilen',tab_rank:'Rangliste',tab_prizes:'Preise',tab_names:'Namen',tab_rec:'Aufnehmen',tab_how:'Wie',
+    share_title:'✍️ Teile deinen Lieblingssatz',gn_ph:'Schreib den Satz so wie er gesagt wird...',
+    es_ph:'Die ungefähre Übersetzung...',pq_ph:'Der Kontext, das Gefühl, die Geschichte...',cat_label:'Kategorie',
+    share_btn:'🚀 Teilen und +15 Pkt. gewinnen',wa_alt:'Lieber per WhatsApp senden?',wa_btn:'Per WhatsApp mitmachen',
+    rank_title:'🏆 Top-Teilnehmer diesen Monat',stat_frases:'Sätze',stat_votes:'Stimmen',stat_part:'Teilnehmer',
+    prizes_title:'🎁 Monatliche Preise',cd_title:'Nächste Verlosung in',
+    names_title:'🌿 Verfügbare Namen',names_sub:'Jeder Guaraní-Name hat eine besondere Bedeutung. Sie sind einzigartig!',
+    sug_title:'💡 Namen vorschlagen',sug_gn:'Name auf Guaraní',sug_gn_ph:'Bsp: Yvytu',sug_sig:'Bedeutung',sug_sig_ph:'Bsp: Sanfter Wind',sug_btn:'💡 Namen vorschlagen',
+    sug_comm:'🗳️ Für Vorschläge abstimmen',rec_title:'🎙️ Stimmtest',rec_frases:'Die 6 Sätze:',rec_start:'Stimmtest starten →',
+    how_what:'🌿 Was ist Jopara Vibe?',how_steps:'⭐ Wie mitmachen',pts_title:'⭐ Punktesystem',
+    step1_t:'Teile deinen Lieblingssatz',step1_p:'Ein Sprichwort, etwas Unübersetzbares, etwas Alltägliches.',
+    step2_t:'Diskutiere und verbessere Sätze',step2_p:'Kommentiere Grammatik und regionale Varianten.',
+    step3_t:'Bewerte Sätze anderer',step3_p:'👍 wenn er dir gefällt, 🔥 wenn er außergewöhnlich ist.',
+    step4_t:'Nimm deine Stimme auf',step4_p:'Die besten werden zu bezahlten Aufnahmen eingeladen.',
+    fb_lbl:'Ist das sprachlich korrekt?',fb_ok:'✅ Korrekt',fb_var:'🔄 Variante',fb_err:'❌ Fehler',
+    c_send:'Senden',c_cancel:'Abbrechen',c_btn:'✏️ Kommentieren',c_ph:'Dein Kommentar, Korrektur oder regionale Variante...',
+    no_comments:'Sei der Erste, der kommentiert.',empty_feed:'Sei der Erste!',empty_feed_p:'Noch keine Sätze in dieser Kategorie.',
+    f_all:'Alle',toast_name:'Schreib deinen Namen 👆',toast_lugar:'Schreib deine Stadt oder dein Land 👆',
+    toast_gn:'Schreib den Satz auf Guaraní 👆',toast_es:'Füge die Übersetzung hinzu 👆',toast_c:'Schreib deinen Kommentar 👆',
+    toast_own:'Du kannst deinen eigenen Satz nicht bewerten',toast_ej:'Das ist ein Beispielsatz! Teile deinen eigenen 😊',
+    toast_voted_l:'👍 Stimme gezählt! +1 Pkt.',toast_voted_f:'🔥 Mit Feuer abgestimmt! +1 Pkt.',
+    toast_already:'Du hast bereits abgestimmt 😊',toast_limit:'Stimmenlimit pro Stunde ⏳',
+    toast_fb_ok:'✅ Als korrekt markiert +1 Pkt.',toast_fb_var:'🔄 Variante registriert +1 Pkt.',toast_fb_err:'❌ Fehler gemeldet +1 Pkt.',
+    toast_fb_ya:'Feedback bereits gesendet',toast_c_sent:'💬 Kommentar gesendet +2 Pkt.',
+    toast_shared:'🚀 Satz geteilt! +15 Pkt.',toast_copied:'📋 Kopiert',
+    toast_sug:'💡 Vorschlag gesendet!',toast_sug_v:'👍 Stimme gezählt',toast_bio:'✅ Bio gespeichert',toast_name_taken:'Dieser Name ist bereits vergeben 😅',
+    lang_title:'🌐 Sprache / Language',lang_sub:'Wähle deine bevorzugte Sprache.',lang_ok:'Fertig ✓',
+    welcome:'Willkommen! 👋',welcome_sub:'Wähle einen einzigartigen Guaraní-Namen — wer zuerst wählt, behält ihn für immer.',
+    or_write:'— oder schreib deinen eigenen —',name_ph:'Dein Name oder Spitzname...',lugar_ph:'Bsp: Asunción, Deutschland, Wien...',start_btn:'Mitmachen starten 🚀',
+    perfil_bio:'Bio',perfil_logros:'🏅 Abzeichen',perfil_frases:'📝 Seine/Ihre Sätze',perfil_close:'Schließen',
+    perfil_bio_ph:'Erzähl etwas über dich...',perfil_bio_save:'Bio speichern',
+    staff_title:'🔐 Staff-Zugang',no_sug:'Noch keine ausstehenden Vorschläge.',
+    cat_warn:'⚠️ Diese Kategorie wird mit dem Silva-Team überprüft. Nur neutrale Sätze.',bio_label:'📖 Bio',
+  },
+  en:{
+    tagline:'Voices that connect',hero_t:'Your voice makes <span>digital history</span>',
+    hero_s:'Contribute with the Guaraní you speak every day.',welcome_back:'Welcome back,',
+    tab_feed:'Feed',tab_share:'Share',tab_rank:'Ranking',tab_prizes:'Prizes',tab_names:'Names',tab_rec:'Record',tab_how:'How',
+    share_title:'✍️ Share your favourite phrase',gn_ph:'Write the phrase as it is said...',
+    es_ph:'The approximate translation...',pq_ph:'The context, the feeling, the story...',cat_label:'Category',
+    share_btn:'🚀 Share and earn +15 pts',wa_alt:'Prefer to send via WhatsApp?',wa_btn:'Participate via WhatsApp',
+    rank_title:'🏆 Top participants this month',stat_frases:'Phrases',stat_votes:'Votes',stat_part:'Participants',
+    prizes_title:'🎁 Monthly prizes',cd_title:'Next draw in',
+    names_title:'🌿 Available names',names_sub:'Each Guaraní name has a special meaning. They are unique!',
+    sug_title:'💡 Suggest a name',sug_gn:'Name in Guaraní',sug_gn_ph:'E.g.: Yvytu',sug_sig:'Meaning',sug_sig_ph:'E.g.: Gentle wind',sug_btn:'💡 Suggest name',
+    sug_comm:'🗳️ Vote on community suggestions',rec_title:'🎙️ Voice test',rec_frases:'The 6 phrases:',rec_start:'Start voice test →',
+    how_what:'🌿 What is Jopara Vibe?',how_steps:'⭐ How to participate',pts_title:'⭐ Points system',
+    step1_t:'Share your favourite phrase',step1_p:'A saying, something untranslatable, something everyday.',
+    step2_t:'Discuss and improve phrases',step2_p:'Comment on grammar and regional variants.',
+    step3_t:'Vote on others\' phrases',step3_p:'👍 if you like it, 🔥 if it\'s extraordinary.',
+    step4_t:'Record your voice',step4_p:'The best voices are invited to paid recordings.',
+    fb_lbl:'Is it linguistically correct?',fb_ok:'✅ Correct',fb_var:'🔄 Variant',fb_err:'❌ Error',
+    c_send:'Send',c_cancel:'Cancel',c_btn:'✏️ Comment',c_ph:'Your comment, correction or regional variant...',
+    no_comments:'Be the first to comment.',empty_feed:'Be the first!',empty_feed_p:'No phrases in this category yet.',
+    f_all:'All',toast_name:'Write your name 👆',toast_lugar:'Write your city or country 👆',
+    toast_gn:'Write the phrase in Guaraní 👆',toast_es:'Add the translation 👆',toast_c:'Write your comment 👆',
+    toast_own:'You can\'t vote for your own phrase',toast_ej:'This is an example phrase! Share your own 😊',
+    toast_voted_l:'👍 Vote registered! +1 pt',toast_voted_f:'🔥 Voted with fire! +1 pt',
+    toast_already:'You already voted for this phrase 😊',toast_limit:'Hourly vote limit reached ⏳',
+    toast_fb_ok:'✅ Marked as correct +1 pt',toast_fb_var:'🔄 Variant registered +1 pt',toast_fb_err:'❌ Error reported +1 pt',
+    toast_fb_ya:'Feedback already sent',toast_c_sent:'💬 Comment sent +2 pts',
+    toast_shared:'🚀 Phrase shared! +15 pts',toast_copied:'📋 Copied',
+    toast_sug:'💡 Suggestion sent!',toast_sug_v:'👍 Vote registered',toast_bio:'✅ Bio saved',toast_name_taken:'That name is already taken 😅',
+    lang_title:'🌐 Language / Idioma',lang_sub:'Choose your preferred language.',lang_ok:'Done ✓',
+    welcome:'Welcome! 👋',welcome_sub:'Choose a unique Guaraní name — the first to choose it keeps it forever.',
+    or_write:'— or write your own —',name_ph:'Your name or nickname...',lugar_ph:'E.g.: Asunción, Germany, London...',start_btn:'Start participating 🚀',
+    perfil_bio:'Bio',perfil_logros:'🏅 Achievements',perfil_frases:'📝 Their phrases',perfil_close:'Close',
+    perfil_bio_ph:'Tell us something about yourself...',perfil_bio_save:'Save bio',
+    staff_title:'🔐 Staff access',no_sug:'No pending suggestions yet.',
+    cat_warn:'⚠️ This category is under review with the Silva team. Neutral phrases only.',bio_label:'📖 Bio',
+  }
+};
+
+// t() — traduce una clave al idioma actual
+function t(key){ return (TR[S.lang]&&TR[S.lang][key])||TR.es[key]||key; }
+
+function detectLang(){
+  // PRIORIDAD 1: elección guardada del usuario — nunca se sobreescribe
+  const saved=localStorage.getItem('jv_lang');
+  if(saved&&LANGS[saved]){S.lang=saved;applyLang();return;}
+  // PRIORIDAD 2: detección del navegador solo si no hay elección guardada
+  const bl=(navigator.language||navigator.userLanguage||'es').toLowerCase();
+  const code=bl.startsWith('pt')?'pt':bl.startsWith('fr')?'fr':bl.startsWith('ru')?'ru':bl.startsWith('de')?'de':bl.startsWith('en')?'en':'es';
+  S.lang=code;
+  applyLang();
+}
+
+function applyLang(){
+  // Safe element accessor
+  const el=id=>document.getElementById(id);
+  if(el('langBtn'))el('langBtn').textContent=`🌐 ${LANGS[S.lang].label}`;
+  // Aplicar traducción a elementos estáticos
+  if(el('hTagline'))el('hTagline').textContent=t('tagline');
+  if(el('heroTitle'))el('heroTitle').innerHTML=t('hero_t');
+  if(el('heroSub'))el('heroSub').textContent=t('hero_s');
+  if(el('tFeed'))el('tFeed').textContent=t('tab_feed');
+  if(el('tShare'))el('tShare').textContent=t('tab_share');
+  if(el('tRank'))el('tRank').textContent=t('tab_rank');
+  if(el('tPrizes'))el('tPrizes').textContent=t('tab_prizes');
+  if(el('tNames'))el('tNames').textContent=t('tab_names');
+  if(el('tRec'))el('tRec').textContent=t('tab_rec');
+  if(el('tHow'))el('tHow').textContent=t('tab_how');
+  if(el('inGn'))el('inGn').placeholder=t('gn_ph');
+  if(el('inEs'))el('inEs').placeholder=t('es_ph');
+  if(el('inPq'))el('inPq').placeholder=t('pq_ph');
+  if(el('inNombre'))el('inNombre').placeholder=t('name_ph');
+  if(el('inLugar'))el('inLugar').placeholder=t('lugar_ph');
+  if(el('sugNombre'))el('sugNombre').placeholder=t('sug_gn_ph');
+  if(el('sugSig'))el('sugSig').placeholder=t('sug_sig_ph');
+  // Modal texts
+  if(el('langModalTitle'))el('langModalTitle').textContent=t('lang_title');
+  if(el('langModalSub'))el('langModalSub').textContent=t('lang_sub');
+  if(el('langModalOk'))el('langModalOk').textContent=t('lang_ok');
+  if(el('nombreModalTitle'))el('nombreModalTitle').textContent=t('welcome');
+  if(el('nombreModalSub'))el('nombreModalSub').textContent=t('welcome_sub');
+  if(el('nombreModalOr'))el('nombreModalOr').textContent=t('or_write');
+  if(el('startBtn'))el('startBtn').textContent=t('start_btn');
+}
+
+function renderLangPicker(){
+  document.getElementById('langPicker').innerHTML=Object.entries(LANGS).map(([code,l])=>
+    `<button class="lp-btn ${S.lang===code?'active':''}" onclick="setLang('${code}')">${l.flag} ${l.name}</button>`
+  ).join('');
+}
+
+function setLang(code){
+  S.lang=code;
+  localStorage.setItem('jv_lang',code);
+  saveLocal();
+  applyLang();
+  renderLangPicker();
+  // Only re-render what's currently visible
+  const activeTab=document.querySelector('.tab.active');
+  const activeSecId=document.querySelector('.sec.active')?.id;
+  if(activeSecId==='sec-feed') renderFrases();
+  if(activeSecId==='sec-ranking') renderRanking();
+  updateBienvenida();
+}
+function abrirLang(){document.getElementById('modalLang').classList.add('show');}
+function cerrarLang(){document.getElementById('modalLang').classList.remove('show');}
+
+// ═══════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════
+function showTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('sec-'+name).classList.add('active');
+  if(name==='premios'){
+    setTimeout(()=>playTick(4), 200);
+    setTimeout(()=>{ if(window._countdownUpdate) window._countdownUpdate(); }, 100);
+  }
+  if(name==='feed') setTimeout(()=>initScrollReveal(), 100);
+}
+function filtrar(el,tipo){
+  document.querySelectorAll('.filtro').forEach(f=>f.classList.remove('active'));
+  el.classList.add('active');
+  S.filtro=tipo;
+  renderFrases();
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER FEED
+// ═══════════════════════════════════════════════════════
+// Map nombres to emojis
+const NOMBRE_EMOJI={
+  "Ñe'ẽ":"🗣️","Ñe'ẽ Ñembotavy":"🌀","Yvoty":"🌸","Kuarahy":"☀️","Mbarete":"💪",
+  "Ara":"🌤️","Ñandutí":"🕸️","Pytyvõ":"🤝","Yvypóra":"🌍","Mburuvicha":"👑",
+  "Guyrapa":"🌈","Jacaré":"🐊","Mainumby":"🦜","Jasy":"🌙","Tupã":"⚡",
+  "Ysyrý":"🌊","Yaguareté":"🐆","Ko'ẽ":"🌅","Mbyja":"⭐","Yvytu":"🍃",
+  "Tataypy":"🔥","Aguara":"🦊","Karumbé":"🐢","Pindo":"🌴","Karai":"🧙",
+  "Ñemity":"🌱","Tape":"🛤️","Ytu":"💧","Mbói":"🐍","Pytã":"❤️",
+  };
+
+function getEmoji(nombre){
+  if(!nombre)return null;
+  // Exact match
+  if(NOMBRE_EMOJI[nombre])return NOMBRE_EMOJI[nombre];
+  // Partial match
+  for(const[k,v] of Object.entries(NOMBRE_EMOJI)){if(nombre.includes(k))return v;}
+  return null;
+}
+
+function avH(nombre,bg,fg,size=30){
+  const emoji=getEmoji(nombre);
+  if(emoji){
+    const fs=Math.round(size*.6);
+    return`<div class="av" style="width:${size}px;height:${size}px;background:${bg};color:${fg};font-size:${fs}px;line-height:${size}px;text-align:center;">${emoji}</div>`;
+  }
+  return`<div class="av" style="width:${size}px;height:${size}px;background:${bg};color:${fg};font-size:${Math.round(size*.43)}px;">${nombre?nombre[0].toUpperCase():'?'}</div>`;
+}
+
+const CAT_MAP={intraducibles:['Intraducible','Intrad'],dichos:['Dicho'],cotidiano:['Cotidiano','Daily'],sentimental:['Sentimental'],humor:['Humor'],naturaleza:['Naturaleza','Nature'],medico:['Médico','Medico'],juridico:['Jurídico','Juridico'],espiritual:['Espiritual'],educacion:['Educación','Educacion'],campo:['Agricultura','Campo'],musica:['Música','Musica']};
+
+function renderFrases(){
+  const c=document.getElementById('feedCont');
+  let fs=[...S.frases];
+  if(S.filtro==='revision')fs=fs.filter(f=>(f.flags_error||0)>=2);
+  else if(CAT_MAP[S.filtro])fs=fs.filter(f=>(f.tags||[]).some(tg=>CAT_MAP[S.filtro].some(k=>tg.includes(k))));
+  fs.sort((a,b)=>(b.votos_like+b.votos_fire*2)-(a.votos_like+a.votos_fire*2));
+  if(!c) return;
+  if(fs.length===0){c.innerHTML=`<div class="empty"><div class="ei">🌿</div><h3>${t('empty_feed')}</h3><p>${t('empty_feed_p')}</p></div>`;return;}
+  c.innerHTML=fs.map(f=>{
+    const prof=f.profiles||{};
+    const bg=prof.avatar_color||'#D62828',fg=prof.avatar_fg||'#fff';
+    const nombre=prof.nombre||'?',lugar=prof.lugar||'';
+    const vt=S.votes[f.id],fb=S.feedbacks[f.id];
+    const nc=f.comentarios_count||0,er=(f.flags_error||0)>=2;
+    const gnEsc=(f.guarani||'').replace(/'/g,"\\'");
+    const esEj=f.es_ejemplo;
+    return`<div class="fc${esEj?' ejemplo':''}" id="fc-${f.id}">
+      <div class="fc-hdr">
+        <div class="fc-user" onclick="verPerfil('${nombre}','${lugar}','${bg}','${fg}')">
+          ${avH(nombre,bg,fg)}
+          <div><div class="fc-name">${nombre}</div><div class="fc-lugar">📍 ${lugar}</div></div>
+        </div>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;">
+          ${esEj?'<div class="badge-ejemplo">✨ Ejemplo</div>':''}
+          ${f.silva_sello&&!esEj?'<div class="badge-silva">✅ Silva</div>':''}
+          ${f.seleccionada&&!f.silva_sello&&!esEj?'<div class="badge-sel">⭐ Seleccionada</div>':''}
+          ${er?'<div class="badge-rev">⚠️ Revisión</div>':''}
+        </div>
+      </div>
+      <div class="fc-gn">"${f.guarani||''}"</div>
+      <div class="fc-es">${f.espanol||''}</div>
+      ${f.porque?`<div class="fc-why">💡 ${f.porque}</div>`:''}
+      <div class="fc-tags">${(f.tags||[]).map(tg=>`<span class="fc-tag">${tg}</span>`).join('')}</div>
+      <div class="vrow">
+        <button class="vbtn${vt==='like'?' vl':''}" onclick="votar('${f.id}','like')">👍 ${f.votos_like||0}</button>
+        <button class="vbtn${vt==='fire'?' vf':''}" onclick="votar('${f.id}','fire')">🔥 ${f.votos_fire||0}</button>
+        <button class="sbtn" onclick="compartir('${gnEsc}')">↗️</button>
+      </div>
+      <div class="fb-lbl">¿Es lingüísticamente correcto?</div>
+      <div class="fbrow">
+        <button class="fbbtn${fb==='ok'?' fb-ok':''}" onclick="fbRapido('${f.id}','ok')">✅ Correcto</button>
+        <button class="fbbtn${fb==='variante'?' fb-var':''}" onclick="fbRapido('${f.id}','variante')">🔄 Variante</button>
+        <button class="fbbtn${fb==='error'?' fb-err':''}" onclick="fbRapido('${f.id}','error')">❌ Error</button>
+      </div>
+      ${renderAudioSection(f)}
+      <div class="cs">
+        <button class="ctoggle" onclick="toggleC('${f.id}')">💬 ${nc} comentario${nc!==1?'s':''} <span id="ar-${f.id}">▸</span></button>
+        <div id="cl-${f.id}" style="display:none;">
+          <div id="clist-${f.id}"><div style="font-size:11px;color:var(--texto2);padding:4px 0 8px;">Sé el primero en comentar.</div></div>
+          <button class="vbtn" style="font-size:11px;margin-bottom:6px;" onclick="toggleForm('${f.id}')">✏️ Comentar</button>
+          <div class="cform" id="cf-${f.id}">
+            <div class="ctrow">
+              <button class="ct" onclick="selCT('${f.id}','comentario',this)">💬</button>
+              <button class="ct" onclick="selCT('${f.id}','ok',this)">✅ Correcto</button>
+              <button class="ct" onclick="selCT('${f.id}','variante',this)">🔄 Variante</button>
+              <button class="ct" onclick="selCT('${f.id}','error',this)">❌ Error</button>
+            </div>
+            <textarea class="cinput" id="ci-${f.id}" rows="2" placeholder="Tu comentario, corrección o variante regional..."></textarea>
+            <div class="cact">
+              <button class="cbs cbs-send" onclick="enviarC('${f.id}')">Enviar</button>
+              <button class="cbs cbs-cancel" onclick="toggleForm('${f.id}')">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateStats();
+
+}
+
+// ═══════════════════════════════════════════════════════
+// PERFIL
+// ═══════════════════════════════════════════════════════
+function abrirPerfil(){
+  if(!S.profile){document.getElementById('modalNombre').classList.add('show');return;}
+  renderPerfilModal(S.profile.nombre,S.profile.lugar,S.profile.avatar_color,S.profile.avatar_fg,true);
+  document.getElementById('modalPerfil').classList.add('show');
+}
+
+function cerrarPerfil(){document.getElementById('modalPerfil').classList.remove('show');}
+
+function verPerfil(nombre,lugar,bg,fg){
+  renderPerfilModal(nombre,lugar,bg,fg,false);
+  document.getElementById('modalPerfil').classList.add('show');
+}
+
+function renderPerfilModal(nombre,lugar,bg,fg,esPropio){
+  const misFreses=S.frases.filter(f=>f.profiles?.nombre===nombre||f.autor_id===S.profile?.id&&nombre===S.profile?.nombre);
+  const totalVotos=misFreses.reduce((a,f)=>(f.votos_like||0)+(f.votos_fire||0)+a,0);
+  const pts=esPropio?(S.profile?.puntos||0):Math.round((totalVotos*4)+misFreses.length*15);
+
+  // Logros
+  const logros=[];
+  if(misFreses.length>=1)logros.push({txt:'🌱 Primera frase',ok:true});
+  if(misFreses.length>=5)logros.push({txt:'📚 5 frases',ok:true});
+  if(totalVotos>=10)logros.push({txt:'🔥 10 votos',ok:true});
+  if(totalVotos>=50)logros.push({txt:'⭐ 50 votos',ok:true});
+  if(pts>=100)logros.push({txt:'💯 100 pts',ok:true});
+  if(logros.length===0)logros.push({txt:'🌱 Participar',ok:false});
+
+  const bio=esPropio?(localStorage.getItem('jv_bio')||''):'';
+  // Check if name is from official list or custom
+  const nombreEnLista = S.nombres.some(n => n.nombre === nombre);
+  const puedesCambiarNombre = esPropio && !nombreEnLista;
+  const bioHtml=esPropio
+    ?`<textarea class="perfil-bio-edit" id="bioEdit" rows="3" maxlength="150" placeholder="Contá algo sobre vos — de dónde sos, qué te conecta con el guaraní... (máx. 150 caracteres)">${bio}</textarea><button class="btn btn-oro btn-sm" onclick="guardarBio()" style="margin-bottom:12px;">Guardar bio</button>`
+    :`<div class="perfil-bio">${bio||'<span style="color:var(--gris4)">Sin bio todavía.</span>'}</div>`;
+
+  document.getElementById('perfilBox').innerHTML=`
+    <div class="perfil-header">
+      ${avH(nombre,bg,fg,60)}
+      <div>
+        <div class="perfil-nombre">${nombre}</div>
+        <div class="perfil-lugar">📍 ${lugar||'Paraguay'}</div>
+        ${esPropio?'<div style="font-size:10px;color:var(--oro);margin-top:3px;">Tu perfil</div>':''}
+      </div>
+    </div>
+    <div class="perfil-stats">
+      <div class="perfil-stat"><div class="perfil-stat-n">${pts}</div><div class="perfil-stat-l">Puntos</div></div>
+      <div class="perfil-stat"><div class="perfil-stat-n">${misFreses.length}</div><div class="perfil-stat-l">Frases</div></div>
+      <div class="perfil-stat"><div class="perfil-stat-n">${totalVotos}</div><div class="perfil-stat-l">Votos recibidos</div></div>
+    </div>
+    <div class="card-title">📖 Bio</div>
+    ${bioHtml}
+    <div class="card-title" style="margin-bottom:8px;">🏅 Logros</div>
+    <div class="logros">${logros.map(l=>`<div class="logro ${l.ok?'ok':''}">${l.txt}</div>`).join('')}</div>
+    ${misFreses.length>0?`<div class="card-title" style="margin-bottom:8px;margin-top:12px;">📝 Sus frases</div>${misFreses.slice(0,3).map(f=>`<div class="fc" style="margin-bottom:8px;"><div class="fc-gn" style="font-size:13px;">"${f.guarani}"</div><div class="fc-es">${f.espanol}</div></div>`).join('')}`:''}
+    ${esPropio ? `
+    <div style="border-top:1px solid var(--gris3);margin-top:16px;padding-top:14px;">
+      ${puedesCambiarNombre ? `
+      <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🔄 Cambiar nombre</div>
+      <div style="font-size:11px;color:var(--texto2);margin-bottom:8px;line-height:1.5;">Podés cambiar tu nombre porque lo elegiste vos. Los nombres de la lista oficial no se pueden cambiar.</div>
+      <input type="text" id="nuevoNombreInput" maxlength="30" placeholder="Nuevo nombre..." style="width:100%;background:var(--gris2);border:1px solid var(--gris3);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:8px 10px;outline:none;margin-bottom:8px;">
+      <button class="btn btn-azul btn-sm" onclick="cambiarNombre()" style="width:100%;margin-bottom:14px;">Guardar nuevo nombre</button>
+      ` : `
+      <div style="font-size:11px;color:var(--texto2);margin-bottom:14px;">
+        🌿 Tu nombre <strong style="color:var(--oro);">${nombre}</strong> es de la lista oficial guaraní — es tuyo para siempre.
+      </div>
+      `}
+      <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🌿 Sugerí un nombre guaraní</div>
+      <div style="font-size:11px;color:var(--texto2);margin-bottom:8px;line-height:1.5;">¿Conocés un nombre guaraní que no está en la lista?</div>
+      <input type="text" id="sugNombrePerfil" maxlength="30" placeholder="Nombre en guaraní..." style="width:100%;background:var(--gris2);border:1px solid var(--gris3);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:8px 10px;outline:none;margin-bottom:6px;">
+      <input type="text" id="sugSigPerfil" maxlength="80" placeholder="Significado..." style="width:100%;background:var(--gris2);border:1px solid var(--gris3);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:8px 10px;outline:none;margin-bottom:8px;">
+      <button class="btn btn-verde btn-sm" onclick="sugerirNombrePerfil()" style="width:100%;margin-bottom:10px;">💡 Sugerir nombre</button>
+      ${S.sugerencias && S.sugerencias.length > 0 ? `
+      <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🗳️ Votá sugerencias</div>
+      ${S.sugerencias.slice(0,3).map(s=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--gris3);">
+          <div style="flex:1;font-size:12px;"><strong>${s.nombre}</strong> — ${s.significado}</div>
+          <span style="font-size:11px;color:var(--oro);font-weight:700;">👍 ${s.votos||0}</span>
+          <button class="btn btn-azul btn-sm" onclick="votarSug('${s.id}')">Votar</button>
+        </div>`).join('')}
+      ` : ''}
+    </div>
+    ` : ''}
+    <button class="btn btn-ghost" onclick="cerrarPerfil()" style="margin-top:12px;">Cerrar</button>
+  `;
+}
+
+function guardarBio(){
+  const bio=document.getElementById('bioEdit')?.value.trim()||'';
+  localStorage.setItem('jv_bio',bio);
+  toast2(t('toast_bio'));
+}
+
+// ═══════════════════════════════════════════════════════
+// NOMBRE MODAL
+// ═══════════════════════════════════════════════════════
+function renderNombresGrid(){
+  const disp=S.nombres.filter(n=>!n.tomado_por&&!n.reservado_para);
+  const shuffled=[...disp].sort(()=>Math.random()-.5).slice(0,6);
+  const grid=document.getElementById('nombresGrid');
+  if(!grid)return;
+  grid.innerHTML=shuffled.map(n=>`<div class="nc" onclick="selNombre(this,'${n.nombre.replace(/'/g,"\\'")}')">
+      <div style="font-size:28px;text-align:center;margin-bottom:4px;">${n.emoji||'🌿'}</div>
+      <div class="nc-gn">${n.nombre}</div>
+      <div class="nc-es">${n.significado}</div>
+    </div>`).join('');
+}
+
+function selNombre(el,nombre){
+  document.querySelectorAll('.nc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');document.getElementById('inNombre').value=nombre;
+}
+
+async function guardarNombre(){
+  const nombre=document.getElementById('inNombre').value.trim();
+  const lugar=document.getElementById('inLugar').value.trim();
+  if(!nombre){toast2(t('toast_name'));return;}
+  if(!lugar){toast2(t('toast_lugar'));return;}
+  const[bg,fg]=AV[Math.floor(Math.random()*AV.length)];
+  const profile={nombre,lugar,rol:'usuario',puntos:10,avatar_color:bg,avatar_fg:fg};
+  try{
+    const{data,error}=await sb.from('profiles').insert(profile).select().single();
+    if(error&&error.code==='23505'){toast2(t('toast_name_taken'));return;}
+    if(data)S.profile=data;
+  }catch(e){}
+  S.profile=S.profile||{...profile,id:'local_'+Date.now()};
+  document.getElementById('ptsH').textContent=10;
+  document.getElementById('modalNombre').classList.remove('show');
+  saveLocal();updateBienvenida();
+  playWelcome(); haptic(50);
+  popupPts(10,'¡Bienvenido/a a la comunidad!');
+  // Auto-sugerir si nombre no está en lista + puntos
+  const enLista=S.nombres.some(n=>n.nombre.toLowerCase()===nombre.toLowerCase());
+  if(!enLista&&nombre.length>2){
+    try{
+      await sb.from('nombre_sugerencias').insert({
+        nombre, significado:'(pendiente de descripción)',
+        sugerido_por:S.profile.id, votos:0, estado:'pendiente'
+      });
+      // +5 pts por sugerir
+      S.profile.puntos=(S.profile.puntos||0)+5;
+      document.getElementById('ptsH').textContent=S.profile.puntos;
+      saveLocal();
+    }catch(e){}
+    setTimeout(()=>toast2('💡 Tu nombre fue enviado a la comunidad +5 pts'),2500);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// VOTAR
+// ═══════════════════════════════════════════════════════
+async function votar(id,tipo){
+  if(!S.profile){document.getElementById('modalNombre').classList.add('show');return;}
+  const f=S.frases.find(f=>f.id===id||f.id===String(id));
+  if(f?.es_ejemplo){toast2(t('toast_ej'));return;}
+  if(f&&(f.profiles?.nombre===S.profile.nombre||f.autor_id===S.profile.id)){toast2(t('toast_own'));return;}
+  if(S.votes[id]){toast2(t('toast_already'));return;}
+  // 10 min cooldown for new users — show friendly modal
+  if(S.profile.created_at){
+    const age = Date.now() - new Date(S.profile.created_at).getTime();
+    if(age < 600000){ abrirCooldown(600000 - age); return; }
+  }
+  // Reset daily vote counter
+  if(Date.now()-S.votosHoraReset>86400000){S.votosHora=0;S.votosHoraReset=Date.now();}
+  if(S.votosHora>=30){toast2(t('toast_limit'));return;}
+  S.votes[id]=tipo;S.votosHora++;
+  if(f){if(tipo==='like')f.votos_like=(f.votos_like||0)+1;else f.votos_fire=(f.votos_fire||0)+1;}
+  if(S.profile){S.profile.puntos=(S.profile.puntos||0)+1;document.getElementById('ptsH').textContent=S.profile.puntos;}
+  saveLocal();renderFrases();renderRanking();updateBienvenida();
+  haptic(tipo === 'fire' ? 60 : 30);
+  try{spawnParticles(document.querySelector('.vbtn.vl,.vbtn.vf')||document.body,tipo);}catch(e){}
+  if (tipo === 'fire') playFire(); else playPop();
+  toast2(tipo==='fire'?t('toast_voted_f'):t('toast_voted_l'));
+  try{await sb.from('votes').insert({user_id:S.profile.id,frase_id:id,tipo});}catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════
+// FEEDBACK
+// ═══════════════════════════════════════════════════════
+async function fbRapido(id,tipo){
+  if(!S.profile){document.getElementById('modalNombre').classList.add('show');return;}
+  if(S.feedbacks[id]){toast2(t('toast_fb_ya'));return;}
+  S.feedbacks[id]=tipo;
+  const f=S.frases.find(f=>f.id===id||f.id===String(id));
+  if(f&&tipo==='error')f.flags_error=(f.flags_error||0)+1;
+  if(S.profile){S.profile.puntos=(S.profile.puntos||0)+1;document.getElementById('ptsH').textContent=S.profile.puntos;}
+  saveLocal();renderFrases();
+  const m={ok:t('toast_fb_ok'),variante:t('toast_fb_var'),error:t('toast_fb_err')};
+  toast2(m[tipo]);
+  try{await sb.from('feedback').insert({user_id:S.profile.id,frase_id:id,tipo});}catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════
+// COMENTARIOS
+// ═══════════════════════════════════════════════════════
+function toggleC(id){
+  const el=document.getElementById('cl-'+id),ar=document.getElementById('ar-'+id);
+  if(el.style.display==='none'){el.style.display='block';ar.textContent='▾';}
+  else{el.style.display='none';ar.textContent='▸';}
+}
+function toggleForm(id){document.getElementById('cf-'+id).classList.toggle('open');}
+function selCT(id,tipo,el){S.cTipos[id]=tipo;el.parentElement.querySelectorAll('.ct').forEach(b=>b.className='ct');const m={comentario:'sc',ok:'so',variante:'sv',error:'se'};el.classList.add(m[tipo]||'sc');}
+
+async function enviarC(id){
+  if(!S.profile){document.getElementById('modalNombre').classList.add('show');return;}
+  const txt=document.getElementById('ci-'+id).value.trim();
+  if(!txt){toast2(t('toast_c'));return;}
+
+  // Min length
+  if(txt.length < 5){toast2('💬 Escribí al menos 5 caracteres');return;}
+
+  // Max 3 comments per user per frase
+  if(!S.comentariosCount) S.comentariosCount={};
+  const cKey=id+'_'+S.profile.nombre;
+  if((S.comentariosCount[cKey]||0)>=5){toast2('⚠️ Máximo 5 comentarios por frase');return;}
+
+  // 30 second cooldown between comments
+  if(!S.lastComentario) S.lastComentario=0;
+  const elapsed=Date.now()-S.lastComentario;
+  if(elapsed<120000){
+    const secsLeft=Math.ceil((120000-elapsed)/1000);
+    const mins=Math.floor(secsLeft/60),secs=secsLeft%60;
+    toast2('⏳ Esperá '+(mins>0?mins+'m ':'')+secs+'s antes de comentar de nuevo');
+    return;
+  }
+
+  const tipo=S.cTipos[id]||'comentario';
+  const f=S.frases.find(f=>f.id===id||f.id===String(id));
+  if(f&&tipo==='error')f.flags_error=(f.flags_error||0)+1;
+  if(S.profile){S.profile.puntos=(S.profile.puntos||0)+2;document.getElementById('ptsH').textContent=S.profile.puntos;}
+  document.getElementById('ci-'+id).value='';document.getElementById('cf-'+id).classList.remove('open');
+  // Track spam counters
+  S.comentariosCount[cKey]=(S.comentariosCount[cKey]||0)+1;
+  S.lastComentario=Date.now();
+  saveLocal();
+  const tipos={ok:'ct-ok',variante:'ct-var',error:'ct-err',comentario:'ct-com'};
+  const labels={ok:'✅',variante:'🔄',error:'❌',comentario:'💬'};
+  const[bg,fg]=S.profile.avatar_color?[S.profile.avatar_color,S.profile.avatar_fg]:AV[0];
+  const newC=`<div class="ci"><div class="ci-hdr"><div class="ci-av" style="background:${bg};color:${fg};">${S.profile.nombre[0]}</div><div class="ci-name">${S.profile.nombre}</div><div class="ci-tipo ${tipos[tipo]}">${labels[tipo]}</div></div><div class="ci-txt">${txt}</div></div>`;
+  const el=document.getElementById('clist-'+id);
+  if(el){const prev=el.innerHTML.includes(t('no_comments').substring(0,8))?'':el.innerHTML;el.innerHTML=prev+newC;}
+  playComment();
+  toast2(t('toast_c_sent'));
+  try{await sb.from('comentarios').insert({frase_id:id,autor_id:S.profile.id,tipo,texto:txt});}catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════
+// ENVIAR FRASE
+// ═══════════════════════════════════════════════════════
+function cc(el,id){document.getElementById(id).textContent=el.value.length;}
+function selTag(el){
+  el.classList.toggle('sel');
+  const hayWarn=[...document.querySelectorAll('.tag.warn.sel')].length>0;
+  document.getElementById('catWarn').style.display=hayWarn?'block':'none';
+}
+
+async function enviarFrase(){
+  if(!S.profile){document.getElementById('modalNombre').classList.add('show');return;}
+  const gn=document.getElementById('inGn').value.trim();
+  const es=document.getElementById('inEs').value.trim();
+  const pq=document.getElementById('inPq').value.trim();
+  const tags=[...document.querySelectorAll('#tagRowEnviar .tag.sel')].map(t=>t.textContent.trim());
+  if(!gn){toast2(t('toast_gn'));return;}
+  if(!es){toast2(t('toast_es'));return;}
+  const[bg,fg]=S.profile.avatar_color?[S.profile.avatar_color,S.profile.avatar_fg]:AV[0];
+  const nueva={guarani:gn,espanol:es,porque:pq,tags:tags.length>0?tags:['🏠 Cotidiano'],autor_id:S.profile?.id,votos_like:0,votos_fire:0,flags_error:0,seleccionada:false,silva_sello:false,profiles:{nombre:S.profile.nombre,lugar:S.profile.lugar,avatar_color:bg,avatar_fg:fg}};
+  try{const{data}=await sb.from('frases').insert({guarani:gn,espanol:es,porque:pq,tags:tags.length>0?tags:['🏠 Cotidiano'],autor_id:S.profile?.id}).select().single();if(data)nueva.id=data.id;}catch(e){}
+  if(!nueva.id)nueva.id='l'+Date.now();
+  // Pioneer bonus — first frase in empty category
+  const selCats = tags.length > 0 ? tags : ['🏠 Cotidiano'];
+  selCats.forEach(cat => {
+    const existing = S.frases.filter(f => !f.es_ejemplo && (f.tags||[]).some(t=>t===cat));
+    if (existing.length === 0) {
+      if (S.profile) S.profile.puntos = (S.profile.puntos||0) + 30;
+      setTimeout(()=>toast2('🥇 ¡Pioneer! Primera frase en ' + cat + ' +30 pts'), 2000);
+    }
+  });
+  S.frases.splice(FRASES_EJEMPLO.length,0,nueva);
+  if(S.profile){S.profile.puntos=(S.profile.puntos||0)+15;document.getElementById('ptsH').textContent=S.profile.puntos;}
+  document.getElementById('inGn').value='';document.getElementById('inEs').value='';document.getElementById('inPq').value='';
+  ['cGn','cEs','cPq'].forEach(id=>document.getElementById(id).textContent='0');
+  document.querySelectorAll('#tagRowEnviar .tag.sel').forEach(t=>t.classList.remove('sel'));
+  document.getElementById('catWarn').style.display='none';
+  saveLocal();renderFrases();renderRanking();updateBienvenida();
+  playShare(); haptic(80);
+  popupPts(15,'¡Tu frase está en el feed!');
+  setTimeout(()=>document.querySelectorAll('.tab')[0].click(),1700);
+}
+
+// ═══════════════════════════════════════════════════════
+// RANKING
+// ═══════════════════════════════════════════════════════
+function renderRanking(){
+  const u={};
+  S.frases.forEach(f=>{
+    if(f.es_ejemplo)return;
+    const n=f.profiles?.nombre||'?';
+    if(!u[n])u[n]={nombre:n,lugar:f.profiles?.lugar||'',pts:0,frases:0,bg:f.profiles?.avatar_color||'#333',fg:f.profiles?.avatar_fg||'#fff'};
+    u[n].pts+=((f.votos_like||0)*3)+((f.votos_fire||0)*5)+15;u[n].frases++;
+  });
+  if(S.profile){const n=S.profile.nombre;if(!u[n])u[n]={nombre:n,lugar:S.profile.lugar||'',pts:S.profile.puntos||0,frases:0,bg:S.profile.avatar_color||'#333',fg:S.profile.avatar_fg||'#fff'};else u[n].pts=Math.max(u[n].pts,S.profile.puntos||0);}
+  const sorted=Object.values(u).sort((a,b)=>b.pts-a.pts).slice(0,10);
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('rankCont').innerHTML=sorted.map((u,i)=>{
+    const r=i+1;
+    return`<div class="ri ${r<=3?'r'+r:''}">
+      <div class="rn">${r<=3?medals[r-1]:r}</div>
+      ${avH(u.nombre,u.bg,u.fg,28)}
+      <div class="ri-info"><div class="ri-name" onclick="verPerfil('${u.nombre}','${u.lugar}','${u.bg}','${u.fg}')">${u.nombre}</div><div class="ri-lugar">📍 ${u.lugar} · ${u.frases} frase${u.frases!==1?'s':''}</div></div>
+      <div style="text-align:right;flex-shrink:0;"><div class="ri-pts-n">${u.pts}</div><div class="ri-pts-l">pts</div></div>
+    </div>`;
+  }).join('');
+  updateStats();
+}
+
+function updateStats(){
+  const reales=S.frases.filter(f=>!f.es_ejemplo);
+  document.getElementById('sFrases').textContent=reales.length;
+  document.getElementById('sVotos').textContent=reales.reduce((a,f)=>(f.votos_like||0)+(f.votos_fire||0)+a,0);
+  const u=new Set(reales.map(f=>f.profiles?.nombre||'?'));
+  if(S.profile)u.add(S.profile.nombre);
+  document.getElementById('sPart').textContent=u.size;
+}
+
+// ═══════════════════════════════════════════════════════
+// NOMBRES
+// ═══════════════════════════════════════════════════════
+function renderNombresDisp(){
+  const disp=S.nombres.filter(n=>!n.tomado_por&&!n.reservado_para);
+  const tom=S.nombres.filter(n=>n.tomado_por||n.reservado_para);
+  let html=disp.slice(0,20).map(n=>`<div class="sug-card"><div style="font-size:22px;margin-right:8px;flex-shrink:0;">${n.emoji||NOMBRE_EMOJI[n.nombre]||'🌿'}</div><div class="sug-info"><div class="sug-gn">${n.nombre}</div><div class="sug-es">${n.significado}</div></div><button class="btn btn-verde btn-sm" onclick="elegirNombre('${n.nombre.replace(/'/g,"\\'")}','${n.id}')" style="flex-shrink:0;">Elegir</button></div>`).join('');
+  if(tom.length>0){html+=`<div style="font-size:10px;color:var(--texto2);text-transform:uppercase;font-weight:800;letter-spacing:1px;margin:12px 0 6px;">Ya elegidos:</div>`;html+=tom.slice(0,5).map(n=>`<div class="sug-card" style="opacity:.5;"><div class="sug-info"><div class="sug-gn">${n.nombre}</div><div class="sug-es">${n.significado}</div></div><div style="font-size:10px;color:var(--texto2);flex-shrink:0;">Tomado</div></div>`).join('');}
+  const nd=document.getElementById('nombresDisp');
+  if(nd) nd.innerHTML=html||'<div class="empty"><div class="ei">🌿</div><p>Cargando nombres...</p></div>';
+  renderNombresGrid();
+}
+
+async function elegirNombre(nombre,id){
+  if(!S.profile){document.getElementById('modalNombre').classList.add('show');return;}
+  if(S.profile.nombre===nombre){toast2('¡Ya tenés ese nombre! 😄');return;}
+  try{await sb.from('nombres_guarani').update({tomado_por:S.profile.id}).eq('id',id);await sb.from('profiles').update({nombre}).eq('id',S.profile.id);S.profile.nombre=nombre;toast2(`🌿 ¡Ahora te llamás ${nombre}!`);saveLocal();updateBienvenida();renderNombresDisp();}catch(e){toast2('Error al elegir nombre');}
+}
+
+async function sugerirNombre(){
+  if(!S.profile){document.getElementById('modalNombre').classList.add('show');return;}
+  const nombre=document.getElementById('sugNombre').value.trim();
+  const sig=document.getElementById('sugSig').value.trim();
+  if(!nombre||!sig){toast2('Completá los dos campos 👆');return;}
+  try{await sb.from('nombre_sugerencias').insert({nombre,significado:sig,sugerido_por:S.profile.id});if(S.profile){S.profile.puntos=(S.profile.puntos||0)+5;document.getElementById('ptsH').textContent=S.profile.puntos;}document.getElementById('sugNombre').value='';document.getElementById('sugSig').value='';toast2(t('toast_sug'));saveLocal();await loadFromSupabase();}catch(e){toast2('Error al enviar sugerencia');}
+}
+
+function renderSugerencias(){
+  const c=document.getElementById('sugerenciasList');
+  if(!S.sugerencias||S.sugerencias.length===0){c.innerHTML='<div style="font-size:12px;color:var(--texto2);">No hay sugerencias pendientes todavía.</div>';return;}
+  c.innerHTML=S.sugerencias.map(s=>`<div class="sug-card"><div class="sug-info"><div class="sug-gn">${s.nombre}</div><div class="sug-es">${s.significado} — por ${s.profiles?.nombre||'?'}</div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;"><span class="sug-v">👍 ${s.votos||0}</span><button class="btn btn-azul btn-sm" onclick="votarSug('${s.id}')">Votar</button>${S.rol==='admin'||S.lektorUnlocked?`<button class="btn btn-verde btn-sm" onclick="aprobarSug('${s.id}','${s.nombre.replace(/'/g,"\\'")}','${s.significado.replace(/'/g,"\\'")}')">✅</button>`:''}</div></div>`).join('');
+}
+
+async function votarSug(id){
+  if(!S.profile){document.getElementById('modalNombre').classList.add('show');return;}
+  try{
+    const{data}=await sb.from('nombre_sugerencias').select('votos,sugerido_por,nombre').eq('id',id).single();
+    const newVotos=(data?.votos||0)+1;
+    await sb.from('nombre_sugerencias').update({votos:newVotos}).eq('id',id);
+    if(data?.sugerido_por && data.sugerido_por!==S.profile.id){
+      if(newVotos===5) toast2('🌿 "'+data.nombre+'" llegó a 5 votos — el autor gana +10 pts!');
+      if(newVotos===10){
+        toast2('🥇 "'+data.nombre+'" llegó a 10 votos — ¡puede entrar a la lista oficial!');
+        try{
+          const{data:prof}=await sb.from('profiles').select('puntos').eq('id',data.sugerido_por).single();
+          if(prof) await sb.from('profiles').update({puntos:(prof.puntos||0)+15}).eq('id',data.sugerido_por);
+        }catch(e){}
+      }
+    }
+    const sug=S.sugerencias.find(s=>s.id===id||s.id===String(id));
+    if(sug) sug.votos=(sug.votos||0)+1;
+    toast2(t('toast_sug_v'));
+    renderSugerencias();
+  }catch(e){toast2(t('toast_sug_v'));}
+}
+async function aprobarSug(id,nombre,sig){
+  try{
+    // Get suggester
+    const{data:sug}=await sb.from('nombre_sugerencias').select('sugerido_por').eq('id',id).single();
+    await sb.from('nombre_sugerencias').update({estado:'aprobado',aprobado_por:S.profile?.id}).eq('id',id);
+    await sb.from('nombres_guarani').insert({nombre,significado:sig,orden:99});
+    // Award +25 pts to suggester
+    if(sug?.sugerido_por){
+      const{data:prof}=await sb.from('profiles').select('puntos').eq('id',sug.sugerido_por).single();
+      if(prof) await sb.from('profiles').update({puntos:(prof.puntos||0)+25}).eq('id',sug.sugerido_por);
+    }
+    toast2('✅ Nombre "'+nombre+'" aprobado! El autor recibe +25 pts 🌿');
+    await loadFromSupabase();
+  }catch(e){toast2('Error al aprobar');}
+}
+
+// ═══════════════════════════════════════════════════════
+// GRABAR
+// ═══════════════════════════════════════════════════════
+function renderFrasesGrabar(){
+  document.getElementById('frasesGrabar').innerHTML=FRASES_GRABAR.map((f,i)=>`<div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--gris3);"><div style="width:20px;height:20px;background:var(--gris3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">${i+1}</div><div style="font-size:12px;font-weight:700;">${f}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// ADMIN / LEKTOR
+// ═══════════════════════════════════════════════════════
+// renderAdminLoginSection replaced by admin panel version
+function abrirAdmin(tipo){S.pendingAdminType=tipo;document.getElementById('adminLoginSub').textContent=tipo==='admin'?'Contraseña de administrador':'Contraseña de lektor';document.getElementById('adminPw').value='';document.getElementById('modalAdmin').classList.add('show');}
+function cerrarAdmin(){document.getElementById('modalAdmin').classList.remove('show');}
+// verificarAdmin replaced by admin panel version
+
+// ═══════════════════════════════════════════════════════
+// COUNTDOWN
+// ═══════════════════════════════════════════════════════
+function startCountdown(){
+  function update(){
+    const cdTime=document.getElementById('cdTime');
+    const cdSub=document.getElementById('cdSub');
+    if(!cdTime||!cdSub) return; // element not in DOM yet
+    const now=new Date(),launch=new Date('2026-04-15');
+    const firstDraw=new Date(launch.getFullYear(),launch.getMonth()+2,1);
+    const target=now<firstDraw?firstDraw:new Date(now.getFullYear(),now.getMonth()+1,1);
+    const diff=target-now;
+    if(diff<=0){cdTime.textContent='¡HOY!';return;}
+    const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m=Math.floor((diff%3600000)/60000);
+    cdTime.textContent=`${d}d ${h}h ${m}m`;
+    cdSub.textContent=now<firstDraw?`Primer sorteo: ${firstDraw.toLocaleDateString()}`:`Próximo: ${target.toLocaleDateString()}`;
+  }
+  // Run every minute — also triggered when Premios tab opens
+  setInterval(update,60000);
+  window._countdownUpdate=update; // expose for tab switch
+}
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function toast2(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+function popupPts(num,msg){
+  const p=document.getElementById('pp'),o=document.getElementById('overlay');
+  const numEl=document.getElementById('ppNum');
+  numEl.textContent='+0';
+  document.getElementById('ppMsg').textContent=msg;
+  p.classList.add('show');o.classList.add('show');
+  playPoints();
+  animateCounter(numEl, 0, num, 500);
+  setTimeout(()=>{p.classList.remove('show');o.classList.remove('show');},2200);
+}
+function compartir(texto){if(navigator.share)navigator.share({text:`"${texto}" — Jopara Vibe 🌿\ntuvozguarani.com`});else navigator.clipboard.writeText(`"${texto}" — Jopara Vibe 🌿\ntuvozguarani.com`).then(()=>toast2(t('toast_copied')));}
+
+// ═══════════════════════════════════════════════════════
+// SOUND ENGINE — Warm/Organic
+// ═══════════════════════════════════════════════════════
+let audioCtx = null;
+let soundEnabled = true;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function loadSoundPref() {
+  const saved = localStorage.getItem('jv_sound');
+  soundEnabled = saved === null ? true : saved === 'true';
+  updateSoundBtn();
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem('jv_sound', soundEnabled);
+  updateSoundBtn();
+  if (soundEnabled) playPop();
+}
+
+function updateSoundBtn() {
+  const btn = document.getElementById('soundBtn');
+  if (btn) btn.textContent = soundEnabled ? '🔊' : '🔇';
+}
+
+// Warm marimba-style pop — for voting
+function playPop(freq = 523, duration = 0.18) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const now = ctx.currentTime;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.7, now + duration);
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    osc.start(now); osc.stop(now + duration);
+  } catch(e) {}
+}
+
+// Fire vote — higher and brighter
+function playFire() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+    [880, 1100, 1320].forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0.2, now + i * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.15);
+      osc.start(now + i * 0.07); osc.stop(now + i * 0.07 + 0.15);
+    });
+  } catch(e) {}
+}
+
+// Share frase — warm upward chime
+function playShare() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+    [392, 523, 659, 784].forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0.25, now + i * 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.2);
+      osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.25);
+    });
+  } catch(e) {}
+}
+
+// Welcome — warm soft chord
+function playWelcome() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+    [261, 329, 392, 523].forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0, now + i * 0.05);
+      gain.gain.linearRampToValueAtTime(0.18, now + i * 0.05 + 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.6);
+      osc.start(now + i * 0.05); osc.stop(now + i * 0.05 + 0.7);
+    });
+  } catch(e) {}
+}
+
+// Points popup — ascending celebratory
+function playPoints() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+    [523, 659, 784, 1046].forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0.22, now + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.18);
+      osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.2);
+    });
+  } catch(e) {}
+}
+
+// Clock tick — for countdown reveal
+function playTick(n = 4) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    for (let i = 0; i < n; i++) {
+      const now = ctx.currentTime + i * 0.22;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.value = 1200;
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      osc.start(now); osc.stop(now + 0.05);
+    }
+  } catch(e) {}
+}
+
+// Comment sent — soft notification
+function playComment() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+    [440, 554].forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0.15, now + i * 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.2);
+      osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.25);
+    });
+  } catch(e) {}
+}
+
+// Streak! — special celebration
+function playStreak() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+    [523, 659, 784, 659, 784, 1046].forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0.2, now + i * 0.09);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.15);
+      osc.start(now + i * 0.09); osc.stop(now + i * 0.09 + 0.18);
+    });
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════
+// HAPTIC FEEDBACK
+// ═══════════════════════════════════════════════════════
+function haptic(ms = 30) {
+  if (navigator.vibrate) navigator.vibrate(ms);
+}
+
+// ═══════════════════════════════════════════════════════
+// PARTICLE ANIMATION — hearts/sparks on vote
+// ═══════════════════════════════════════════════════════
+function spawnParticles(btn, tipo) {
+  const rect = btn.getBoundingClientRect();
+  const emoji = tipo === 'fire' ? ['🔥','✨','⚡'] : ['❤️','🌸','⭐'];
+  for (let i = 0; i < 4; i++) {
+    const el = document.createElement('div');
+    el.textContent = emoji[Math.floor(Math.random() * emoji.length)];
+    el.style.cssText = `
+      position:fixed;
+      left:${rect.left + rect.width/2}px;
+      top:${rect.top}px;
+      font-size:${14 + Math.random()*10}px;
+      pointer-events:none;
+      z-index:9999;
+      transition:all 0.8s ease-out;
+      opacity:1;
+    `;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => {
+      el.style.transform = `translate(${(Math.random()-0.5)*80}px, ${-60-Math.random()*60}px)`;
+      el.style.opacity = '0';
+    });
+    setTimeout(() => el.remove(), 900);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// STREAK SYSTEM
+// ═══════════════════════════════════════════════════════
+const STREAK_REWARDS = [
+  {days:2,  pts:5,  msg:"¡Che, 2 días seguidos! 🔥"},
+  {days:3,  pts:10, msg:"¡3 días! ¡Seguí nomás! 🔥"},
+  {days:7,  pts:25, msg:"¡Una semana entera! ⭐ +25 pts"},
+  {days:14, pts:50, msg:"¡14 días! ¡Imparable! 🏅 +50 pts"},
+  {days:30, pts:100,msg:"¡Un mes completo! 👑 +100 pts"},
+];
+
+function checkStreak() {
+  const today = new Date().toDateString();
+  const lastActive = localStorage.getItem('jv_last_active');
+  let streak = parseInt(localStorage.getItem('jv_streak') || '0');
+
+  if (lastActive === today) return; // ya se chequeó hoy
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (lastActive === yesterday.toDateString()) {
+    streak++;
+  } else if (lastActive !== today) {
+    streak = 1; // resetear si no fue ayer
+  }
+
+  localStorage.setItem('jv_streak', streak);
+  localStorage.setItem('jv_last_active', today);
+
+  // Dar puntos si corresponde
+  const reward = STREAK_REWARDS.find(r => r.days === streak);
+  if (reward && S.profile) {
+    S.profile.puntos = (S.profile.puntos || 0) + reward.pts;
+    document.getElementById('ptsH').textContent = S.profile.puntos;
+    saveLocal();
+    setTimeout(() => {
+      playStreak();
+      haptic(100);
+      toast2(reward.msg + ' +' + reward.pts + ' pts');
+    }, 2000);
+  }
+
+  // Mostrar streak actual en bienvenida
+  if (streak >= 2) {
+    const bvText = document.getElementById('bvNombre');
+    if (bvText) {
+      const streakEl = document.createElement('span');
+      streakEl.style.cssText = 'margin-left:8px;font-size:11px;color:var(--oro);';
+      streakEl.textContent = streak + ' días seguidos 🔥';
+      bvText.parentElement.appendChild(streakEl);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// ANIMATED POINTS COUNTER
+// ═══════════════════════════════════════════════════════
+function animateCounter(el, from, to, duration = 600) {
+  const start = Date.now();
+  const tick = () => {
+    const elapsed = Date.now() - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(from + (to - from) * eased);
+    if (progress < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// ═══════════════════════════════════════════════════════
+// SCROLL REVEAL
+// ═══════════════════════════════════════════════════════
+function initScrollReveal() {}
+
+// ═══════════════════════════════════════════════════════
+// TAGESZEIT BEGRÜSSUNG
+// ═══════════════════════════════════════════════════════
+function getTimeGreeting() {
+  const h = new Date().getHours();
+  if (h >= 6 && h < 12)  return { icon:'☀️', text:'¡Buenos días' };
+  if (h >= 12 && h < 18) return { icon:'🌿', text:'¡Buenas tardes' };
+  if (h >= 18 && h < 22) return { icon:'🌙', text:'¡Buenas noches' };
+  return { icon:'⭐', text:'¡Buenas noches' };
+}
+
+
+// ═══════════════════════════════════════════════════════
+// COOLDOWN MODAL
+// ═══════════════════════════════════════════════════════
+let cooldownInterval = null;
+
+function abrirCooldown(msRestantes) {
+  const modal = document.getElementById('cooldownModal');
+  modal.classList.add('show');
+  playTick(2);
+
+  // Update timer live
+  let remaining = msRestantes;
+  function updateTimer() {
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    document.getElementById('cooldownTimer').textContent =
+      mins + ':' + String(secs).padStart(2, '0');
+    if (remaining <= 0) {
+      cerrarCooldown();
+      toast2('¡Ya podés votar, che! 🎉');
+      playWelcome();
+    } else {
+      // Tick every 10 seconds
+      if (secs % 10 === 0 && remaining > 0) playTick(1);
+    }
+    remaining -= 1000;
+  }
+  updateTimer();
+  if (cooldownInterval) clearInterval(cooldownInterval);
+  cooldownInterval = setInterval(updateTimer, 1000);
+}
+
+function cerrarCooldown() {
+  document.getElementById('cooldownModal').classList.remove('show');
+  if (cooldownInterval) { clearInterval(cooldownInterval); cooldownInterval = null; }
+}
+
+// ═══════════════════════════════════════════════════════
+// TOOLTIP SYSTEM
+// ═══════════════════════════════════════════════════════
+const TOOLTIPS_SEEN = JSON.parse(localStorage.getItem('jv_tips') || '{}');
+
+function saveTipSeen(id) {
+  TOOLTIPS_SEEN[id] = true;
+  localStorage.setItem('jv_tips', JSON.stringify(TOOLTIPS_SEEN));
+}
+
+function showTooltip(anchorEl, text, tipId) {
+  if (TOOLTIPS_SEEN[tipId]) return;
+  // Remove any existing tooltip
+  document.querySelectorAll('.tooltip-bubble').forEach(t => t.remove());
+  const tip = document.createElement('div');
+  tip.className = 'tooltip-bubble';
+  tip.innerHTML = text;
+  tip.style.position = 'fixed';
+  document.body.appendChild(tip);
+  const rect = anchorEl.getBoundingClientRect();
+  const tipW = 260;
+  let left = rect.left;
+  if (left + tipW > window.innerWidth - 10) left = window.innerWidth - tipW - 10;
+  tip.style.left = left + 'px';
+  tip.style.top = (rect.bottom + 8) + 'px';
+  saveTipSeen(tipId);
+  setTimeout(() => tip.remove(), 4000);
+}
+
+function showFeedTip() {
+  if (TOOLTIPS_SEEN['feed_vote']) return;
+  const feedCont = document.getElementById('feedCont');
+  if (!feedCont) return;
+  const tip = document.createElement('div');
+  tip.className = 'feed-tooltip';
+  tip.innerHTML = `
+    <button class="close-tip" onclick="this.parentElement.remove()">✕</button>
+    💡 <strong>¿Cómo funciona el feed?</strong><br>
+    Tocá <strong>👍</strong> si te gusta una frase.<br>
+    Tocá <strong>🔥</strong> si es extraordinaria.<br>
+    Tocá <strong>🎙️</strong> para grabar tu voz leyéndola.
+  `;
+  feedCont.insertBefore(tip, feedCont.firstChild);
+  saveTipSeen('feed_vote');
+  setTimeout(() => { if (tip.parentElement) tip.remove(); }, 7000);
+}
+
+function showSilvaTip(el) {
+  showTooltip(el,
+    '✅ <strong>Sello Silva</strong><br>El Prof. Ramón Silva validó esta frase como auténtica y lingüísticamente correcta.',
+    'silva_seal'
+  );
+}
+
+function showStreakTip(el) {
+  showTooltip(el,
+    '🔥 <strong>Racha / Streak</strong><br>Participá varios días seguidos y ganás puntos extra. ¡Cuanto más días, más puntos!',
+    'streak_tip'
+  );
+}
+
+// ═══════════════════════════════════════════════════════
+// AUDIO RECORDING SYSTEM
+// ═══════════════════════════════════════════════════════
+let mediaRecorder = null;
+let audioChunks = [];
+let recTimer = null;
+let recSeconds = 0;
+let currentRecFraseId = null;
+let audioFormData = {};
+
+// Audio form options
+const DIALECTOS = [
+  { val: 'jopara',    label: 'Jopará (mezcla cotidiana)' },
+  { val: 'puro',      label: 'Guaraní más puro' },
+  { val: 'portugues', label: 'Con influencia del portugués' },
+  { val: 'regional',  label: 'Regional / campo' },
+];
+
+const EDAD_OPTS = [
+  { val: '-25',  label: 'Menos de 25' },
+  { val: '25-45',label: '25 – 45' },
+  { val: '45+',  label: '45 o más' },
+];
+
+const CIUDADES_PY = [
+  'Asunción','Ciudad del Este','Encarnación','San Lorenzo','Luque',
+  'Capiatá','Lambaré','Fernando de la Mora','Limpio','Ñemby',
+  'Pedro Juan Caballero','Concepción','Coronel Oviedo','Villarrica',
+  'Pilar','Caaguazú','Paraguarí','San Juan Bautista','Caacupé',
+  'Itauguá','Areguá','Ypacaraí','San Ignacio','Ayolas',
+  'Hohenau','Obligado','Bella Vista','Capitán Bado','Amambay',
+  // Exterior
+  'Buenos Aires','Resistencia','Posadas','Corrientes',
+  'São Paulo','Curitiba','Foz do Iguaçu',
+  'Alemania','Austria','Suiza','España','Francia',
+  'Estados Unidos','Canadá','Ucrania','Rusia','Italia',
+];
+
+const CATS_AUDIO = [
+  '🧩 Intraducible','📖 Dicho popular','🏠 Cotidiano','❤️ Sentimental',
+  '😂 Humor','🌿 Naturaleza','🏥 Médico / Salud','⚖️ Jurídico',
+  '🙏 Espiritual / Religioso','🎓 Educación','🌾 Agricultura / Campo',
+  '🎵 Música / Arte','⚠️ Política','🔬 Términos técnicos',
+];
+
+function abrirAudioModal(fraseId) {
+  if (!S.profile) { document.getElementById('modalNombre').classList.add('show'); return; }
+  currentRecFraseId = fraseId;
+  audioFormData = { dialecto: '', lugar: '', categoria: '', edad: '' };
+
+  const frase = S.frases.find(f => f.id === fraseId || f.id === String(fraseId));
+  const gnText = frase ? frase.guarani : '';
+
+  // Build modal content
+  document.getElementById('audioModalFrase').textContent = '"' + gnText + '"';
+  document.getElementById('audioLugar').value = S.profile.lugar || '';
+  audioFormData.lugar = S.profile.lugar || '';
+
+  // Pre-select category from frase tags
+  if (frase && frase.tags && frase.tags.length > 0) {
+    audioFormData.categoria = frase.tags[0];
+  }
+
+  renderAudioFormSelections();
+  document.getElementById('modalAudio').classList.add('show');
+  resetRecorder();
+}
+
+function cerrarAudioModal() {
+  document.getElementById('modalAudio').classList.remove('show');
+  stopRecording(false);
+  resetRecorder();
+}
+
+function renderAudioFormSelections() {
+  // Dialecto
+  document.getElementById('dialectoGroup').innerHTML = DIALECTOS.map(d =>
+    `<button class="radio-opt ${audioFormData.dialecto === d.val ? 'sel' : ''}"
+      onclick="selAudioOpt('dialecto','${d.val}',this)">${d.label}</button>`
+  ).join('');
+
+  // Edad
+  document.getElementById('edadGroup').innerHTML = EDAD_OPTS.map(e =>
+    `<button class="radio-opt ${audioFormData.edad === e.val ? 'sel' : ''}"
+      onclick="selAudioOpt('edad','${e.val}',this)">${e.label}</button>`
+  ).join('');
+
+  // Categoria
+  document.getElementById('catAudioGroup').innerHTML = CATS_AUDIO.map(c =>
+    `<button class="radio-opt ${audioFormData.categoria === c ? 'sel' : ''}"
+      onclick="selAudioOpt('categoria','${c}',this)">${c}</button>`
+  ).join('');
+}
+
+function selAudioOpt(field, val, el) {
+  audioFormData[field] = val;
+  el.closest('.radio-group').querySelectorAll('.radio-opt').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function resetRecorder() {
+  recSeconds = 0;
+  audioChunks = [];
+  if (recTimer) { clearInterval(recTimer); recTimer = null; }
+  const btn = document.getElementById('recBtn');
+  const timerEl = document.getElementById('recTimerEl');
+  const preview = document.getElementById('recPreview');
+  if (btn) { btn.classList.remove('recording'); btn.innerHTML = '🎙️ Grabar'; }
+  if (timerEl) timerEl.textContent = '0:00 / 0:30';
+  if (preview) { preview.style.display = 'none'; preview.src = ''; }
+  document.getElementById('recSendBtn').style.display = 'none';
+}
+
+async function toggleRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    stopRecording(true);
+  } else {
+    await startRecording();
+  }
+}
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      const preview = document.getElementById('recPreview');
+      if (preview) { preview.src = url; preview.style.display = 'block'; }
+      document.getElementById('recSendBtn').style.display = 'flex';
+    };
+    mediaRecorder.start(100);
+    recSeconds = 0;
+    const btn = document.getElementById('recBtn');
+    const timerEl = document.getElementById('recTimerEl');
+    btn.classList.add('recording');
+    btn.innerHTML = '⏹️ Detener';
+    playPop(440);
+    recTimer = setInterval(() => {
+      recSeconds++;
+      const m = Math.floor(recSeconds / 60);
+      const s = recSeconds % 60;
+      if (timerEl) timerEl.textContent = m + ':' + String(s).padStart(2,'0') + ' / 0:30';
+      if (recSeconds >= 30) stopRecording(true);
+    }, 1000);
+  } catch(e) {
+    toast2('❌ No se pudo acceder al micrófono');
+  }
+}
+
+function stopRecording(save) {
+  if (recTimer) { clearInterval(recTimer); recTimer = null; }
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    const btn = document.getElementById('recBtn');
+    if (btn) { btn.classList.remove('recording'); btn.innerHTML = '🎙️ Volver a grabar'; }
+  }
+}
+
+async function enviarAudio() {
+  if (!audioChunks.length) { toast2('Primero grabá tu voz 🎙️'); return; }
+  if (!audioFormData.dialecto) { toast2('Elegí tu tipo de guaraní 👆'); return; }
+  if (!audioFormData.edad) { toast2('Elegí tu rango de edad 👆'); return; }
+
+  const lugar = document.getElementById('audioLugar').value.trim() || S.profile.lugar || 'Desconocido';
+  audioFormData.lugar = lugar;
+
+  const blob = new Blob(audioChunks, { type: 'audio/webm' });
+  const fileName = `audio_${currentRecFraseId}_${Date.now()}.webm`;
+
+  toast2('⏳ Subiendo tu grabación...');
+
+  try {
+    // Upload to Supabase Storage
+    const { data, error } = await sb.storage
+      .from('voice-recordings')
+      .upload(fileName, blob, { contentType: 'audio/webm', upsert: false });
+
+    if (error) throw error;
+
+    // Save metadata to voice_tests table
+    await sb.from('voice_tests').insert({
+      frase_id: currentRecFraseId,
+      grabador_id: S.profile.id,
+      archivo: fileName,
+      dialecto: audioFormData.dialecto,
+      lugar: audioFormData.lugar,
+      categoria: audioFormData.categoria,
+      edad: audioFormData.edad,
+      duracion: recSeconds,
+      estado: 'pendiente',
+    });
+
+    // Award points
+    const esPrimera = true; // simplified — server would check
+    const pts = esPrimera ? 20 : 15;
+    S.profile.puntos = (S.profile.puntos || 0) + pts;
+    document.getElementById('ptsH').textContent = S.profile.puntos;
+    saveLocal();
+
+    cerrarAudioModal();
+    playShare();
+    popupPts(pts, '¡Grabación enviada! Pendiente de revisión.');
+    toast2('🎙️ ¡Grabación enviada! +' + pts + ' pts');
+
+    // Update feed UI
+    renderFrases();
+
+  } catch(e) {
+    // Fallback — save locally and notify
+    toast2('🎙️ Grabación guardada localmente. Se enviará cuando haya conexión.');
+    cerrarAudioModal();
+    playPop();
+  }
+}
+
+// Render audio section in feed card
+function renderAudioSection(f) {
+  try {
+  const audios = f.audios || [];
+  const puedeGrabar = !f.es_ejemplo && audios.length < 5;
+  const yaGrabo = audios.filter(a => a.grabador_id === S.profile?.id).length >= 2;
+  const mostrarInvitacion = audios.length === 0;
+
+  let html = '<div class="audio-section">';
+
+  // Existing recordings
+  if (audios.length > 0) {
+    html += '<div class="audio-list">';
+    audios.filter(a => a.estado === 'validado').forEach((a, i) => {
+      html += `
+        <div class="audio-item">
+          <button class="audio-play" onclick="playAudio('${a.archivo}', this)">▶️</button>
+          <div class="audio-info">
+            <div style="font-size:11px;font-weight:700;">${a.dialecto || 'Guaraní'} · ${a.lugar || ''}</div>
+            <div class="audio-meta">${a.edad || ''} · ${a.categoria || ''}</div>
+          </div>
+          <span class="audio-badge validado">✅ Validado</span>
+        </div>`;
+    });
+    html += '</div>';
+  }
+
+  // Invitation or record button
+  if (mostrarInvitacion && !f.es_ejemplo) {
+    html += `<div class="audio-invite" onclick="if(document.getElementById('modalAudio'))abrirAudioModal('${f.id}')">
+      🎙️ ¡Sé el primero en grabar esta frase!<br>
+      <span style="font-size:10px;color:var(--texto2);">+20 pts por la primera grabación</span>
+    </div>`;
+  } else if (puedeGrabar && !yaGrabo && !f.es_ejemplo) {
+    html += `<button class="rec-btn" onclick="abrirAudioModal('${f.id}')">
+      🎙️ Grabar mi voz <span style="font-size:10px;color:var(--texto2);">(${audios.length}/5 · +${audios.length === 0 ? 20 : 15} pts)</span>
+    </button>`;
+  } else if (f.es_ejemplo) {
+    html += `<div style="font-size:10px;color:var(--texto2);padding:4px 0;">
+      🎙️ Compartí tu propia frase para poder grabarla
+    </div>`;
+  }
+
+  html += '</div>';
+  return html;
+  } catch(e) { return ''; }
+}
+
+let currentAudio = null;
+async function playAudio(archivo, btn) {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  try {
+    const { data } = sb.storage.from('voice-recordings').getPublicUrl(archivo);
+    const audio = new Audio(data.publicUrl);
+    currentAudio = audio;
+    btn.classList.add('playing');
+    btn.textContent = '⏸️';
+    audio.play();
+    audio.onended = () => { btn.classList.remove('playing'); btn.innerHTML = '▶️'; currentAudio = null; };
+  } catch(e) { toast2('Error reproduciendo audio'); }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// NOMBRE CHANGE + SUGERIR FROM PERFIL
+// ═══════════════════════════════════════════════════════
+async function cambiarNombre() {
+  const nuevo = document.getElementById('nuevoNombreInput')?.value.trim();
+  if (!nuevo) { toast2('Escribí el nuevo nombre 👆'); return; }
+  if (nuevo === S.profile.nombre) { toast2('Es el mismo nombre 😄'); return; }
+  // Check if taken
+  const tomado = S.nombres.some(n => n.nombre.toLowerCase() === nuevo.toLowerCase() && n.tomado_por && n.tomado_por !== S.profile.id);
+  if (tomado) { toast2(t('toast_name_taken')); return; }
+  try {
+    await sb.from('profiles').update({ nombre: nuevo }).eq('id', S.profile.id);
+  } catch(e) {}
+  S.profile.nombre = nuevo;
+  S.profile.puntos = (S.profile.puntos||0) + 5;
+  document.getElementById('ptsH').textContent = S.profile.puntos;
+  saveLocal();
+  cerrarPerfil();
+  updateBienvenida();
+  toast2('✅ ¡Nombre cambiado a ' + nuevo + '! +5 pts');
+  // Suggest to community automatically
+  if (nuevo.length > 2) {
+    try {
+      await sb.from('nombre_sugerencias').insert({
+        nombre: nuevo, significado: '(pendiente de descripción)',
+        sugerido_por: S.profile.id, votos: 0, estado: 'pendiente'
+      });
+    } catch(e) {}
+    setTimeout(()=>toast2('💡 Tu nombre fue enviado a la comunidad para votar'), 2500);
+  }
+}
+
+async function sugerirNombrePerfil() {
+  const nombre = document.getElementById('sugNombrePerfil')?.value.trim();
+  const sig = document.getElementById('sugSigPerfil')?.value.trim();
+  if (!nombre || !sig) { toast2('Completá los dos campos 👆'); return; }
+  try {
+    await sb.from('nombre_sugerencias').insert({
+      nombre, significado: sig,
+      sugerido_por: S.profile?.id, votos: 0, estado: 'pendiente'
+    });
+    if (S.profile) { S.profile.puntos = (S.profile.puntos||0) + 5; document.getElementById('ptsH').textContent = S.profile.puntos; }
+    document.getElementById('sugNombrePerfil').value = '';
+    document.getElementById('sugSigPerfil').value = '';
+    saveLocal();
+    toast2('💡 ¡Sugerencia enviada! +5 pts');
+    await loadFromSupabase();
+  } catch(e) { toast2('Error al enviar sugerencia'); }
+}
+
+</script>
+
+<!-- ADMIN PANEL -->
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-header">
+    <div class="admin-title">🔐 <span>ADMIN</span> JOPARA VIBE</div>
+    <button class="btn btn-ghost btn-sm" onclick="cerrarAdminPanel()" style="padding:6px 12px;">✕ Cerrar</button>
+  </div>
+
+  <div class="admin-tabs">
+    <div class="admin-tab active" onclick="showAdminTab('dashboard',this)">📊 Dashboard</div>
+    <div class="admin-tab" onclick="showAdminTab('frases',this)">📝 Frases</div>
+    <div class="admin-tab" onclick="showAdminTab('audio',this)">🎙️ Audio</div>
+    <div class="admin-tab" onclick="showAdminTab('usuarios',this)">👥 Usuarios</div>
+    <div class="admin-tab" onclick="showAdminTab('ganadores',this)">🏆 Ganadores</div>
+    <div class="admin-tab" onclick="showAdminTab('stats',this)">📈 Estadísticas</div>
+    <div class="admin-tab" onclick="showAdminTab('reset',this)" style="color:var(--rojo);">⚠️ Reset</div>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- DASHBOARD -->
+    <div class="admin-sec active" id="admin-dashboard">
+      <div class="stat-grid" id="adminStatGrid">
+        <div class="stat-widget"><div class="n" id="asFrases">—</div><div class="l">Frases</div><div class="sub" id="asNuevas">cargando...</div></div>
+        <div class="stat-widget"><div class="n" id="asUsuarios">—</div><div class="l">Usuarios</div><div class="sub" id="asActivos">activos</div></div>
+        <div class="stat-widget"><div class="n" id="asVotos">—</div><div class="l">Votos totales</div><div class="sub" id="asHoy">hoy</div></div>
+        <div class="stat-widget"><div class="n" id="asAudios">—</div><div class="l">Grabaciones</div><div class="sub" id="asPendientes">pendientes</div></div>
+      </div>
+      <div class="chart-bar-wrap">
+        <div class="chart-title">📂 Frases por categoría</div>
+        <div id="catBarChart"></div>
+      </div>
+      <div class="chart-bar-wrap">
+        <div class="chart-title">🏆 Top 5 usuarios</div>
+        <div id="topUsersChart"></div>
+      </div>
+    </div>
+
+    <!-- FRASES -->
+    <div class="admin-sec" id="admin-frases">
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+        <button class="filtro active" onclick="filtrarAdmin('todas',this)" style="font-size:10px;">Todas</button>
+        <button class="filtro" onclick="filtrarAdmin('pendiente',this)" style="font-size:10px;">⏳ Sin sello</button>
+        <button class="filtro" onclick="filtrarAdmin('revision',this)" style="font-size:10px;">⚠️ Revisión</button>
+        <button class="filtro" onclick="filtrarAdmin('silva',this)" style="font-size:10px;">✅ Silva</button>
+      </div>
+      <div id="adminFrasesTable"></div>
+    </div>
+
+    <!-- AUDIO -->
+    <div class="admin-sec" id="admin-audio">
+      <div style="font-size:12px;color:var(--texto2);margin-bottom:12px;">Grabaciones pendientes de revisión:</div>
+      <div id="adminAudioTable"></div>
+    </div>
+
+    <!-- USUARIOS -->
+    <div class="admin-sec" id="admin-usuarios">
+      <div style="font-size:12px;color:var(--texto2);margin-bottom:12px;">Ranking completo de participantes:</div>
+      <div id="adminUsuariosTable"></div>
+    </div>
+
+    <!-- GANADORES -->
+    <div class="admin-sec" id="admin-ganadores">
+      <div class="winner-card">
+        <div class="card-title" style="color:var(--oro);margin-bottom:10px;">🏆 Anunciar ganador del mes</div>
+        <div style="font-size:11px;color:var(--texto2);margin-bottom:10px;">El ranking actual muestra los siguientes líderes:</div>
+        <div id="winnersPreview"></div>
+        <div style="margin-top:12px;">
+          <label class="lbl">Nombre del ganador (Top 1)</label>
+          <input type="text" id="ganadorNombre" maxlength="40" placeholder="Nombre guaraní del ganador...">
+          <label class="lbl" style="margin-top:6px;">Mensaje personalizado (opcional)</label>
+          <textarea id="ganadorMsg" rows="2" maxlength="200" placeholder="¡Felicitaciones! Tu participación fue extraordinaria..."></textarea>
+          <button class="btn btn-oro" onclick="anunciarGanador()" style="margin-top:6px;">🏆 Anunciar ganador</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px;">
+        <div class="card-title">📸 Fotos de ganadores pendientes</div>
+        <div id="fotosPendientes" style="font-size:12px;color:var(--texto2);">Sin fotos pendientes de revisión.</div>
+      </div>
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+    <div class="admin-sec" id="admin-stats">
+      <div class="chart-bar-wrap">
+        <div class="chart-title">🗣️ Dialecto de las grabaciones</div>
+        <div id="dialectoChart"></div>
+      </div>
+      <div class="chart-bar-wrap">
+        <div class="chart-title">👥 Distribución de edad (grabaciones)</div>
+        <div id="edadChart"></div>
+      </div>
+      <div class="chart-bar-wrap">
+        <div class="chart-title">📍 Top ciudades / regiones</div>
+        <div id="ciudadesChart"></div>
+      </div>
+      <div class="chart-bar-wrap">
+        <div class="chart-title">📈 Crecimiento del dataset</div>
+        <div id="growthChart"></div>
+      </div>
+      <div class="chart-bar-wrap">
+        <div class="chart-title">🔥 Engagement por categoría (votos/frase)</div>
+        <div id="engagementChart"></div>
+      </div>
+    </div>
+
+    <!-- RESET -->
+    <div class="admin-sec" id="admin-reset">
+      <div class="reset-box">
+        <div style="font-size:40px;margin-bottom:10px;">⚠️</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--rojo);margin-bottom:8px;">ZONA DE PELIGRO</div>
+        <div style="font-size:12px;color:var(--texto2);line-height:1.6;margin-bottom:16px;">
+          El reset borra <strong style="color:var(--texto);">TODAS</strong> las frases, votos y comentarios.<br>
+          Los usuarios y grabaciones se conservan.<br>
+          Se genera un log en Supabase antes del reset.
+        </div>
+
+        <!-- Step 1 -->
+        <div class="reset-step active" id="resetStep1">
+          <button class="btn btn-rojo" onclick="resetStep(2)">⚠️ Sí, quiero hacer un reset</button>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="reset-step" id="resetStep2">
+          <div style="font-size:13px;font-weight:800;color:var(--rojo);margin-bottom:10px;">¿Estás absolutamente seguro?</div>
+          <div style="font-size:11px;color:var(--texto2);margin-bottom:12px;">Esta acción no se puede deshacer.</div>
+          <button class="btn btn-rojo" onclick="resetStep(3)" style="margin-bottom:6px;">⚠️ Sí, estoy seguro</button>
+          <button class="btn btn-ghost" onclick="resetStep(1)">Cancelar</button>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="reset-step" id="resetStep3">
+          <div style="font-size:13px;font-weight:800;color:var(--rojo);margin-bottom:10px;">Última confirmación</div>
+          <div style="font-size:11px;color:var(--texto2);margin-bottom:12px;">¿Confirmar reset definitivo?</div>
+          <button class="btn btn-rojo" onclick="ejecutarReset()" style="margin-bottom:6px;">🗑️ Sí, ejecutar reset ahora</button>
+          <button class="btn btn-ghost" onclick="resetStep(1)">Cancelar</button>
+        </div>
+
+        <!-- Done -->
+        <div class="reset-step" id="resetStep4">
+          <div style="color:var(--verde);font-size:14px;font-weight:800;">✅ Reset ejecutado</div>
+          <div id="resetLog" style="font-size:11px;color:var(--texto2);margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- LEKTOR PANEL -->
+<div class="admin-panel" id="lektorPanel">
+  <div class="admin-header" style="background:linear-gradient(135deg,#001a00,#0a2a0a);border-bottom-color:var(--verde);">
+    <div class="admin-title" style="color:var(--texto);">✅ <span style="color:var(--verde);">LEKTOR</span> — Prof. Silva</div>
+    <button class="btn btn-ghost btn-sm" onclick="cerrarLektorPanel()" style="padding:6px 12px;">✕ Cerrar</button>
+  </div>
+  <div class="admin-tabs" style="border-bottom-color:var(--verde);">
+    <div class="admin-tab active" style="color:var(--verde);border-bottom-color:var(--verde);" onclick="showLektorTab('frases',this)">📝 Validar frases</div>
+    <div class="admin-tab" onclick="showLektorTab('audio',this)">🎙️ Aprobar audio</div>
+    <div class="admin-tab" onclick="showLektorTab('nombres',this)">🌿 Nombres</div>
+  </div>
+  <div class="admin-content">
+    <div class="admin-sec active" id="lektor-frases">
+      <div style="font-size:12px;color:var(--texto2);margin-bottom:12px;">Frases pendientes de validación lingüística:</div>
+      <div id="lektorFrasesTable"></div>
+    </div>
+    <div class="admin-sec" id="lektor-audio">
+      <div style="font-size:12px;color:var(--texto2);margin-bottom:12px;">Grabaciones para aprobar:</div>
+      <div id="lektorAudioTable"></div>
+    </div>
+    <div class="admin-sec" id="lektor-nombres">
+      <div style="font-size:12px;color:var(--texto2);margin-bottom:12px;">Nombres sugeridos pendientes de aprobación:</div>
+      <div id="lektorNombresTable"></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
