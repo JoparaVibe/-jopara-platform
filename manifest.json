@@ -1,0 +1,49 @@
+{
+  "name": "Jopara Vibe — Voces que Conectan",
+  "short_name": "Jopara Vibe",
+  "description": "La primera plataforma para construir la IA del guaraní real. Compartí frases, grabá tu voz y ganá premios.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#D62828",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "preview.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["education", "social", "entertainment"],
+  "shortcuts": [
+    {
+      "name": "Compartir frase",
+      "short_name": "Frase",
+      "description": "Compartí una frase en guaraní",
+      "url": "/?tab=grabar",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Ver ranking",
+      "short_name": "Ranking",
+      "description": "Ver el ranking del mes",
+      "url": "/?tab=premios",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

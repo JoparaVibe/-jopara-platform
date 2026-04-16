@@ -4,6 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Jopara Vibe — Voces que Conectan</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#D62828">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Jopara Vibe">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-192.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="shortcut icon" href="icon-32.png">
+
+<!-- SEO & Social -->
+<meta name="description" content="La primera plataforma para construir la IA del guaraní real. Compartí frases, grabá tu voz y ganá premios.">
+<meta property="og:title" content="Jopara Vibe — Voces que Conectan">
+<meta property="og:description" content="La primera plataforma para construir la IA del guaraní real.">
+<meta property="og:image" content="https://app.tuvozguarani.com/preview.png">
+<meta property="og:url" content="https://app.tuvozguarani.com">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Jopara Vibe — Voces que Conectan">
+<meta name="twitter:image" content="https://app.tuvozguarani.com/preview.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Google Analytics -->
@@ -13,6 +42,415 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-SH7VN64C6C');
+// ════════════════════════════════════════════════════════
+// DEMO MODE SYSTEM
+// ════════════════════════════════════════════════════════
+function toggleDemoMode() {
+  S.demoMode = !S.demoMode;
+  saveLocal();
+  updateDemoUI();
+  // Save to Supabase config
+  sb.from('config').upsert({key:'demo_mode', value:S.demoMode.toString()}).catch(()=>{});
+  toast2(S.demoMode ? '🧪 Modo Demo ACTIVADO — cooldowns desactivados' : '✅ Modo Demo DESACTIVADO');
+}
+
+function updateDemoUI() {
+  const banner = document.getElementById('demoBanner');
+  const btn = document.getElementById('demoBtn');
+  const status = document.getElementById('demoStatus');
+  if(banner) banner.style.display = S.demoMode ? 'block' : 'none';
+  if(btn) {
+    btn.textContent = S.demoMode ? '✅ Desactivar Modo Demo' : '🧪 Activar Modo Demo';
+    btn.style.background = S.demoMode ? 'linear-gradient(135deg,var(--verde),#1a7a3f)' : '';
+  }
+  if(status) status.textContent = S.demoMode ? '🟢 Activo' : '⚫ Inactivo';
+}
+
+function cerrarDemoBanner() {
+  document.getElementById('demoBanner').style.display = 'none';
+}
+
+async function guardarFechaSorteo() {
+  const input = document.getElementById('sorteoDateInput').value;
+  if(!input) { toast2('Seleccioná una fecha y hora'); return; }
+  const fecha = new Date(input);
+  S.customSorteoDate = fecha.toISOString();
+  saveLocal();
+  await sb.from('config').upsert({key:'custom_sorteo_date', value:S.customSorteoDate}).catch(()=>{});
+  document.getElementById('sorteoDateStatus').textContent = '✅ Guardado: ' + fecha.toLocaleString();
+  // Update countdown immediately
+  if(window._countdownUpdate) window._countdownUpdate();
+  toast2('⏱️ Fecha del sorteo actualizada');
+}
+
+async function resetFechaSorteo() {
+  S.customSorteoDate = null;
+  saveLocal();
+  await sb.from('config').upsert({key:'custom_sorteo_date', value:''}).catch(()=>{});
+  document.getElementById('sorteoDateStatus').textContent = '↩️ Volviendo al cálculo automático';
+  document.getElementById('sorteoDateInput').value = '';
+  if(window._countdownUpdate) window._countdownUpdate();
+  toast2('↩️ Fecha restablecida — cálculo automático');
+}
+
+// Load demo mode state from Supabase on startup
+async function loadDemoConfig() {
+  try {
+    const {data} = await sb.from('config').select('value').eq('key','demo_mode').single();
+    if(data?.value === 'true') { S.demoMode = true; updateDemoUI(); }
+    const {data:d2} = await sb.from('config').select('value').eq('key','custom_sorteo_date').single();
+    if(d2?.value) { S.customSorteoDate = d2.value; }
+  } catch(e) {}
+}
+
+
+// ════════════════════════════════════════════════════════
+// ADMIN PANEL FUNCTIONS
+// ════════════════════════════════════════════════════════
+function showAdminTab(name, el) {
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.admin-sec').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('admin-'+name).classList.add('active');
+  if(name==='dashboard') renderAdminDashboard();
+  if(name==='frases') renderAdminFrases();
+  if(name==='audio') renderAdminAudio();
+  if(name==='usuarios') renderAdminUsuarios();
+  if(name==='ganadores') renderAdminGanadores();
+  if(name==='stats') renderAdminStats();
+}
+
+function cerrarAdminPanel() {
+  document.getElementById('adminPanel').classList.remove('show');
+}
+
+function showLektorTab(name, el) {
+  document.querySelectorAll('#lektorPanel .admin-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#lektorPanel .admin-sec').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('lektor-'+name).classList.add('active');
+}
+
+function cerrarLektorPanel() {
+  document.getElementById('lektorPanel').classList.remove('show');
+}
+
+function renderAdminLoginSection() {
+  const el = document.getElementById('adminLoginSection');
+  if(!el) return;
+  el.innerHTML = `
+    <div style="border-top:1px solid var(--gris3);margin-top:16px;padding-top:14px;">
+      <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🔐 Acceso Staff</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-rojo btn-sm" onclick="abrirAdmin('admin')">Admin</button>
+        <button class="btn btn-verde btn-sm" onclick="abrirAdmin('lektor')">Lektor</button>
+      </div>
+    </div>`;
+}
+
+function verificarAdmin() {
+  const pw = document.getElementById('adminPw').value;
+  if(pw === ADMIN_PW) {
+    S.adminUnlocked = true; S.rol = 'admin';
+    saveLocal(); cerrarAdmin();
+    document.getElementById('adminPanel').classList.add('show');
+    renderAdminDashboard();
+    toast2('✅ Panel de administración abierto');
+  } else if(pw === LEKTOR_PW) {
+    S.lektorUnlocked = true; S.rol = 'lektor';
+    saveLocal(); cerrarAdmin();
+    document.getElementById('lektorPanel').classList.add('show');
+    renderLektorFrases();
+    toast2('✅ Panel Lektor abierto');
+  } else {
+    toast2('❌ Contraseña incorrecta');
+  }
+}
+
+function renderAdminDashboard() {
+  const frases = S.frases.filter(f=>!f.es_ejemplo);
+  const votos = frases.reduce((a,f)=>(f.votos_like||0)+(f.votos_fire||0)+a,0);
+  const users = new Set(frases.map(f=>f.profiles?.nombre||'?'));
+  if(S.profile) users.add(S.profile.nombre);
+  document.getElementById('asFrases').textContent = frases.length;
+  document.getElementById('asUsuarios').textContent = users.size;
+  document.getElementById('asVotos').textContent = votos;
+  document.getElementById('asAudios').textContent = '—';
+  document.getElementById('asNuevas').textContent = 'total';
+  document.getElementById('asActivos').textContent = 'registrados';
+  document.getElementById('asHoy').textContent = 'total';
+  document.getElementById('asPendientes').textContent = 'pendientes';
+  // Category chart
+  const cats = {};
+  frases.forEach(f=>(f.tags||[]).forEach(t=>{cats[t]=(cats[t]||0)+1;}));
+  const sorted = Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const max = sorted[0]?.[1]||1;
+  document.getElementById('catBarChart').innerHTML = sorted.map(([cat,n])=>`
+    <div class="bar-row">
+      <div class="bar-label">${cat.replace(/[^\w\s]/g,'').trim()}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/max*100)}%;background:var(--rojo);"></div></div>
+      <div class="bar-val">${n}</div>
+    </div>`).join('');
+  // Top users
+  const uMap = {};
+  frases.forEach(f=>{const n=f.profiles?.nombre||'?';uMap[n]=(uMap[n]||0)+1;});
+  const topU = Object.entries(uMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxU = topU[0]?.[1]||1;
+  document.getElementById('topUsersChart').innerHTML = topU.map(([n,c])=>`
+    <div class="bar-row">
+      <div class="bar-label">${n}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(c/maxU*100)}%;background:var(--azul);"></div></div>
+      <div class="bar-val">${c}</div>
+    </div>`).join('');
+}
+
+function filtrarAdmin(tipo, el) {
+  document.querySelectorAll('#admin-frases .filtro').forEach(f=>f.classList.remove('active'));
+  el.classList.add('active');
+  renderAdminFrases(tipo);
+}
+
+function renderAdminFrases(filtro='todas') {
+  let fs = S.frases.filter(f=>!f.es_ejemplo);
+  if(filtro==='pendiente') fs=fs.filter(f=>!f.silva_sello);
+  if(filtro==='revision') fs=fs.filter(f=>(f.flags_error||0)>=2);
+  if(filtro==='silva') fs=fs.filter(f=>f.silva_sello);
+  document.getElementById('adminFrasesTable').innerHTML = fs.length===0
+    ? '<div style="color:var(--texto2);font-size:12px;padding:12px;">No hay frases.</div>'
+    : `<table class="admin-table"><tr><th>Frase</th><th>Autor</th><th>Votos</th><th>Acciones</th></tr>${
+      fs.map(f=>`<tr>
+        <td style="font-size:11px;max-width:180px;">${(f.guarani||'').substring(0,60)}...</td>
+        <td style="font-size:11px;">${f.profiles?.nombre||'?'}</td>
+        <td style="font-size:11px;">${(f.votos_like||0)+' / '+(f.votos_fire||0)}</td>
+        <td><div class="actions">
+          <button class="abtn abtn-silva" onclick="adminSilva('${f.id}')">⚡ Silva</button>
+          <button class="abtn abtn-del" onclick="adminDel('${f.id}')">🗑</button>
+        </div></td></tr>`).join('')
+      }</table>`;
+}
+
+function renderAdminAudio() {
+  document.getElementById('adminAudioTable').innerHTML = '<div style="color:var(--texto2);font-size:12px;padding:12px;">Conectando con Supabase para cargar grabaciones...</div>';
+  sb.from('voice_tests').select('*').eq('estado','pendiente').order('created_at',{ascending:false}).limit(20)
+    .then(({data})=>{
+      if(!data||data.length===0){document.getElementById('adminAudioTable').innerHTML='<div style="color:var(--texto2);font-size:12px;padding:12px;">No hay grabaciones pendientes.</div>';return;}
+      document.getElementById('adminAudioTable').innerHTML=`<table class="admin-table"><tr><th>Frase</th><th>Dialecto</th><th>Lugar</th><th>Acciones</th></tr>${
+        data.map(a=>`<tr>
+          <td style="font-size:11px;">${a.frase_id}</td>
+          <td style="font-size:11px;">${a.dialecto||'—'}</td>
+          <td style="font-size:11px;">${a.lugar||'—'}</td>
+          <td><div class="actions">
+            <button class="abtn abtn-ok" onclick="aprobarAudio('${a.id}')">✅</button>
+            <button class="abtn abtn-del" onclick="rechazarAudio('${a.id}')">❌</button>
+          </div></td></tr>`).join('')
+        }</table>`;
+    });
+}
+
+function renderAdminUsuarios() {
+  const u={};
+  S.frases.filter(f=>!f.es_ejemplo).forEach(f=>{
+    const n=f.profiles?.nombre||'?';
+    if(!u[n])u[n]={nombre:n,lugar:f.profiles?.lugar||'',frases:0,votos:0};
+    u[n].frases++;u[n].votos+=(f.votos_like||0)+(f.votos_fire||0);
+  });
+  const sorted=Object.values(u).sort((a,b)=>b.votos-a.votos);
+  document.getElementById('adminUsuariosTable').innerHTML=sorted.length===0
+    ?'<div style="color:var(--texto2);font-size:12px;padding:12px;">No hay usuarios todavía.</div>'
+    :`<table class="admin-table"><tr><th>#</th><th>Nombre</th><th>Frases</th><th>Votos</th><th>Acción</th></tr>${
+      sorted.map((u,i)=>`<tr>
+        <td>${i+1}</td>
+        <td>${u.nombre}</td>
+        <td>${u.frases}</td>
+        <td>${u.votos}</td>
+        <td><button class="abtn abtn-del" onclick="eliminarUsuario('${u.nombre}')">🗑</button></td>
+      </tr>`).join('')
+    }</table>`;
+}
+
+async function limpiarInactivos() {
+  const dias = parseInt(document.getElementById('inactividadDias')?.value || 180);
+  const cutoff = new Date(Date.now() - dias * 24 * 60 * 60 * 1000).toISOString();
+  const log = document.getElementById('inactivosLog');
+  if(log) log.innerHTML = '⏳ Buscando usuarios inactivos...';
+  try {
+    // Find inactive profiles
+    const {data:inactivos} = await sb.from('profiles')
+      .select('id,nombre,puntos,created_at,updated_at')
+      .lt('updated_at', cutoff)
+      .neq('rol','admin')
+      .neq('rol','lektor');
+    if(!inactivos?.length) {
+      if(log) log.innerHTML = '✅ No hay usuarios inactivos desde hace '+dias+' días.';
+      return;
+    }
+    // Show list first - require second confirmation
+    const nombres = inactivos.map(u=>u.nombre).join(', ');
+    if(!confirm('Se eliminarán '+inactivos.length+' usuarios inactivos (más de '+dias+' días):\n\n'+nombres+'\n\nSus frases quedarán anónimas y sus nombres liberados.\n\n¿Confirmar?')) {
+      if(log) log.innerHTML = '❌ Operación cancelada.';
+      return;
+    }
+    let eliminados = 0;
+    for(const u of inactivos) {
+      // Anonymize frases
+      await sb.from('frases').update({autor_id:null}).eq('autor_id',u.id).catch(()=>{});
+      // Free nombre
+      await sb.from('nombres_guarani').update({tomado_por:null}).eq('tomado_por',u.nombre).catch(()=>{});
+      // Delete profile
+      await sb.from('profiles').delete().eq('id',u.id).catch(()=>{});
+      eliminados++;
+    }
+    if(log) log.innerHTML = '✅ '+eliminados+' usuarios eliminados<br>🌿 Nombres liberados<br>📝 Frases anonimizadas<br>📅 Cutoff: '+new Date(cutoff).toLocaleDateString();
+    renderAdminUsuarios();
+    toast2('✅ Limpieza completada: '+eliminados+' usuarios eliminados');
+  } catch(e) {
+    if(log) log.innerHTML = '❌ Error: '+e.message;
+  }
+}
+
+
+async function eliminarUsuario(nombre) {
+  if(!confirm('¿Eliminar usuario "'+nombre+'"?\nSus frases quedarán anónimas. Su nombre quedará disponible nuevamente.'))return;
+  try {
+    // Anonymize frases - remove author reference
+    const {data:frases} = await sb.from('frases').select('id').eq('autor_id',
+      (await sb.from('profiles').select('id').eq('nombre',nombre).single()).data?.id
+    );
+    if(frases?.length) {
+      await sb.from('frases').update({autor_id:null}).eq('autor_id',
+        (await sb.from('profiles').select('id').eq('nombre',nombre).single()).data?.id
+      );
+    }
+    // Free the nombre
+    await sb.from('nombres_guarani').update({tomado_por:null}).eq('tomado_por',nombre);
+    // Delete profile
+    await sb.from('profiles').delete().eq('nombre',nombre);
+    // Update local state
+    S.frases = S.frases.map(f=>f.profiles?.nombre===nombre ? {...f,profiles:{...f.profiles,nombre:'[eliminado]'}} : f);
+    renderAdminUsuarios(); renderFrases(); renderRanking();
+    toast2('✅ Usuario "'+nombre+'" eliminado — frases anónimas, nombre liberado');
+  } catch(e) { toast2('❌ Error: '+e.message); }
+}
+
+function renderAdminGanadores() {
+  const u={};
+  S.frases.filter(f=>!f.es_ejemplo).forEach(f=>{
+    const n=f.profiles?.nombre||'?';
+    if(!u[n])u[n]={nombre:n,lugar:f.profiles?.lugar||'',pts:0};
+    u[n].pts+=((f.votos_like||0)*3)+((f.votos_fire||0)*5)+15;
+  });
+  if(S.profile){const n=S.profile.nombre;if(!u[n])u[n]={nombre:n,lugar:S.profile.lugar||'',pts:S.profile.puntos||0};else u[n].pts=Math.max(u[n].pts,S.profile.puntos||0);}
+  const top=Object.values(u).sort((a,b)=>b.pts-a.pts).slice(0,10);
+  document.getElementById('winnersPreview').innerHTML=top.map((u,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--gris3);">
+      <div style="font-size:18px;width:24px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1+'°'}</div>
+      <div style="flex:1;font-size:12px;font-weight:800;">${u.nombre}</div>
+      <div style="font-size:12px;color:var(--oro);font-weight:800;">${u.pts} pts</div>
+    </div>`).join('');
+}
+
+function renderAdminStats() {
+  const frases=S.frases.filter(f=>!f.es_ejemplo);
+  document.getElementById('dialectoChart').innerHTML='<div style="color:var(--texto2);font-size:12px;">Datos de grabaciones en Supabase.</div>';
+  document.getElementById('edadChart').innerHTML='<div style="color:var(--texto2);font-size:12px;">Datos de grabaciones en Supabase.</div>';
+  const ciudades={};
+  frases.forEach(f=>{const l=f.profiles?.lugar||'?';ciudades[l]=(ciudades[l]||0)+1;});
+  const top=Object.entries(ciudades).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const max=top[0]?.[1]||1;
+  document.getElementById('ciudadesChart').innerHTML=top.map(([c,n])=>`
+    <div class="bar-row"><div class="bar-label">${c}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/max*100)}%;background:var(--verde);"></div></div>
+    <div class="bar-val">${n}</div></div>`).join('');
+  document.getElementById('growthChart').innerHTML='<div style="color:var(--texto2);font-size:12px;">'+frases.length+' frases totales.</div>';
+  document.getElementById('engagementChart').innerHTML='<div style="color:var(--texto2);font-size:12px;">Ver votos en tabla de frases.</div>';
+}
+
+function anunciarGanador() {
+  const nombre=document.getElementById('ganadorNombre').value.trim();
+  const msg=document.getElementById('ganadorMsg').value.trim();
+  if(!nombre){toast2('Ingresá el nombre del ganador');return;}
+  sb.from('ranking_history').insert({ganador:nombre,mensaje:msg,anunciado_por:S.profile?.id}).then(()=>{
+    toast2('🏆 ¡Ganador anunciado! '+nombre);
+    document.getElementById('ganadorNombre').value='';
+    document.getElementById('ganadorMsg').value='';
+  });
+}
+
+function adminSilva(id) {
+  const f=S.frases.find(f=>f.id===id||f.id===String(id));
+  if(f){f.silva_sello=!f.silva_sello;renderAdminFrases();toast2(f.silva_sello?'⚡ Sello Silva otorgado':'Sello removido');}
+  sb.from('frases').update({silva_sello:S.frases.find(f=>f.id===id)?.silva_sello}).eq('id',id).catch(()=>{});
+}
+
+function adminDel(id) {
+  if(!confirm('¿Eliminar esta frase?'))return;
+  S.frases=S.frases.filter(f=>f.id!==id&&f.id!==String(id));
+  renderAdminFrases();renderFrases();
+  sb.from('frases').delete().eq('id',id).catch(()=>{});
+  toast2('🗑️ Frase eliminada');
+}
+
+function aprobarAudio(id){sb.from('voice_tests').update({estado:'validado'}).eq('id',id).then(()=>{toast2('✅ Audio aprobado');renderAdminAudio();});}
+function rechazarAudio(id){sb.from('voice_tests').update({estado:'rechazado'}).eq('id',id).then(()=>{toast2('❌ Audio rechazado');renderAdminAudio();});}
+
+// ════════════════ RESET SYSTEM ════════════════
+function resetStep(n) {
+  document.querySelectorAll('.reset-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('resetStep'+n).classList.add('active');
+}
+
+async function ejecutarReset() {
+  try {
+    // Log reset in Supabase
+    await sb.from('config').upsert({key:'last_reset',value:new Date().toISOString()});
+    // Delete all non-example frases from Supabase
+    await sb.from('frases').delete().neq('id','placeholder');
+    // Reset pioneer slots - clear tomado_por from nombres_guarani
+    await sb.from('nombres_guarani').update({tomado_por:null}).neq('id','placeholder');
+    // Reset local state
+    S.frases=[...FRASES_EJEMPLO];
+    S.votes={};S.feedbacks={};
+    // Reset pioneer in local nombres
+    S.nombres=S.nombres.map(n=>({...n,tomado_por:null}));
+    saveLocal();
+    renderFrases();renderRanking();renderNombresGrid();renderNombresDisp();
+    document.getElementById('resetStep4').classList.add('active');
+    document.getElementById('resetLog').innerHTML=`✅ Reset completado: ${new Date().toLocaleString()}<br>🌿 Pioneer slots: liberados (30/30 disponibles)<br>📝 Frases: reiniciadas a ejemplos<br>🎵 Nombres: disponibles nuevamente`;
+    document.querySelectorAll('.reset-step:not(#resetStep4)').forEach(s=>s.classList.remove('active'));
+    toast2('✅ Reset ejecutado correctamente');
+  } catch(e) {
+    toast2('❌ Error en reset: '+e.message);
+  }
+}
+
+// Pioneer reset solo - sin borrar frases
+async function resetPioneer() {
+  if(!confirm('¿Resetear solo los slots Pioneer? Los primeros 30 lugares quedarán disponibles nuevamente.'))return;
+  try {
+    await sb.from('profiles').update({pioneer:false}).eq('pioneer',true);
+    await sb.from('nombres_guarani').update({tomado_por:null}).neq('id','placeholder');
+    S.nombres=S.nombres.map(n=>({...n,tomado_por:null}));
+    saveLocal();renderNombresGrid();renderNombresDisp();
+    toast2('🌟 Pioneer slots reseteados — 30/30 disponibles');
+  } catch(e) {
+    toast2('❌ Error: '+e.message);
+  }
+}
+
+function renderLektorFrases() {
+  const pending=S.frases.filter(f=>!f.es_ejemplo&&!f.silva_sello);
+  document.getElementById('lektorFrasesTable').innerHTML=pending.length===0
+    ?'<div style="color:var(--texto2);font-size:12px;padding:12px;">No hay frases pendientes de validación.</div>'
+    :`<table class="admin-table"><tr><th>Frase guaraní</th><th>Español</th><th>Acciones</th></tr>${
+      pending.map(f=>`<tr>
+        <td style="font-size:11px;">${f.guarani||''}</td>
+        <td style="font-size:11px;">${f.espanol||''}</td>
+        <td><button class="abtn abtn-silva" onclick="adminSilva('${f.id}')">⚡ Silva</button></td>
+      </tr>`).join('')
+    }</table>`;
+}
+
+
 </script>
 <style>
 :root{
@@ -462,6 +900,18 @@ textarea:focus,input[type=text]:focus,input[type=password]:focus{border-color:va
 </head>
 <body>
 
+<!-- SPLASH SCREEN -->
+<div id="splashScreen" style="position:fixed;inset:0;z-index:9999;background:#0a0a0a;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .5s ease;">
+  <video autoplay muted playsinline
+    style="width:220px;height:220px;border-radius:50%;object-fit:cover;"
+    id="splashVideo">
+    <source src="icon-anim.mp4" type="video/mp4">
+    <img src="icon-512.png" style="width:220px;height:220px;border-radius:50%;object-fit:cover;" alt="Jopara Vibe">
+  </video>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:4px;color:#fff;margin-top:20px;text-shadow:0 0 30px rgba(214,40,40,0.5);">JOPARA VIBE</div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:3px;margin-top:6px;text-transform:uppercase;">Voces que Conectan</div>
+</div>
+
 <header>
   <div class="logo-area">
     <div class="logo-icon">🎙️</div>
@@ -477,6 +927,11 @@ textarea:focus,input[type=text]:focus,input[type=password]:focus{border-color:va
     <button class="lang-btn" onclick="abrirLang()" id="langBtn">🌐 ES</button>
   </div>
 </header>
+
+<!-- DEMO MODE BANNER -->
+<div id="demoBanner" style="display:none;background:linear-gradient(135deg,#D62828,#F4A823);padding:10px 16px;text-align:center;cursor:pointer;position:sticky;top:71px;z-index:95;" onclick="cerrarDemoBanner()">
+  <span style="font-size:12px;font-weight:800;color:#fff;letter-spacing:1px;">🧪 MODO DEMO ACTIVO — Cooldowns y límites desactivados · Clic para cerrar</span>
+</div>
 
 <!-- BIENVENIDA -->
 <div class="bienvenida" id="bienvenida">
@@ -523,7 +978,7 @@ textarea:focus,input[type=text]:focus,input[type=password]:focus{border-color:va
       <button class="filtro" onclick="filtrar(this,'musica')">🎵</button>
       <button class="filtro" onclick="filtrar(this,'revision')">⚠️</button>
     </div>
-    <div id="feedCont"></div>
+    <div id="feedCont"><div style="text-align:center;padding:40px;color:var(--texto2);">Cargando...</div></div>
   </div>
 
   <!-- ENVIAR -->
@@ -684,6 +1139,9 @@ textarea:focus,input[type=text]:focus,input[type=password]:focus{border-color:va
       <div class="pi"><span>Primera frase en categoría sin frases</span><span class="piv">+30 pts 🥇</span></div>
       <div class="pi"><span>Primera grabación en categoría sin audios</span><span class="piv">+40 pts 🥇</span></div>
 
+      <div style="background:rgba(126,200,227,.07);border:1px solid rgba(126,200,227,.2);border-radius:8px;padding:10px 12px;margin-top:10px;margin-bottom:10px;font-size:11px;color:var(--texto2);line-height:1.6;">
+        📱 <strong style="color:var(--celeste);">¿Cómo cobrar tu premio?</strong> Los premios se notifican por WhatsApp. Sin número registrado, los ganadores se anuncian aquí en la comunidad y deben presentarse. Si un ganador no puede identificarse — por pérdida, rotura del teléfono u otro motivo — el premio se reparte entre los demás ganadores. Podés registrar tu WhatsApp en tu perfil en cualquier momento.
+      </div>
       <div style="background:rgba(244,168,35,.08);border:1px solid rgba(244,168,35,.2);border-radius:8px;padding:10px 12px;margin-top:10px;font-size:11px;color:var(--texto2);line-height:1.6;">
         💡 <strong style="color:var(--oro);">El sistema premia la calidad.</strong> Una frase excelente con Sello Silva y 50 votos vale hasta <strong style="color:var(--texto);">215 puntos</strong>. Votar el máximo diario vale 30 pts. ¡Compartí frases buenas y la comunidad te recompensa!
       </div>
@@ -747,23 +1205,29 @@ textarea:focus,input[type=text]:focus,input[type=password]:focus{border-color:va
 <div class="modal" id="modalNombre">
   <div class="modal-bg"></div>
   <div class="modal-box" style="max-height:95vh;overflow-y:auto;">
-    <div style="text-align:center;margin-bottom:16px;">
-      <div style="font-size:40px;margin-bottom:6px;">🌿</div>
-      <div class="modal-title" id="nombreModalTitle" style="font-size:26px;">¡Bienvenido/a!</div>
-      <div id="nombreModalSub" style="font-size:12px;color:var(--texto2);line-height:1.5;margin-top:4px;">
+
+    <!-- BLOCK 1: NUEVO AQUÍ -->
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:36px;margin-bottom:4px;">🌿</div>
+      <div class="modal-title" id="nombreModalTitle" style="font-size:24px;">¡Bienvenido/a!</div>
+      <div id="nombreModalSub" style="font-size:11px;color:var(--texto2);line-height:1.5;margin-top:4px;">
         Elegí tu nombre guaraní — cada uno tiene un significado especial.<br>
         <strong style="color:var(--oro);">¡Son únicos! El primero que lo elige se lo queda.</strong>
       </div>
     </div>
     <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">🌿 Elegí un nombre guaraní</div>
-    <div class="ng" id="nombresGrid" style="grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;"></div>
+    <!-- PIONEER COUNTER -->
+    <div id="pioneerCounter" style="display:none;background:rgba(244,168,35,.08);border:1px solid rgba(244,168,35,.25);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--texto2);margin-bottom:10px;line-height:1.5;text-align:center;"></div>
+    <!-- ALL 30 NAMES - scrollable -->
+    <div class="ng" id="nombresGrid" style="grid-template-columns:1fr 1fr;gap:8px;max-height:280px;overflow-y:auto;margin-bottom:10px;padding-right:4px;scrollbar-width:thin;"></div>
     <div class="o-label" id="nombreModalOr" style="margin:10px 0;font-size:11px;color:var(--texto2);text-align:center;letter-spacing:1px;">— O ESCRIBÍ EL TUYO —</div>
     <input type="text" id="inNombre" maxlength="30" placeholder="Tu nombre o apodo en guaraní...">
     <div style="font-size:10px;color:var(--texto2);margin-top:-7px;margin-bottom:12px;line-height:1.5;">
       💡 Si tu nombre es auténtico en guaraní, la comunidad lo vota. Con 10 👍 ganás <strong style="color:var(--oro);">+25 pts</strong> y queda en la lista oficial.
     </div>
-    <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📍 ¿De dónde sos?</div>
-    <input type="text" id="inLugar" maxlength="40" placeholder="Escribí tu ciudad o país..." list="ciudadesList">
+    <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🗣️ ¿De dónde es tu guaraní?</div>
+    <div style="font-size:10px;color:var(--texto2);margin-bottom:6px;line-height:1.4;">La ciudad o región donde creciste o aprendiste el idioma — no necesariamente donde vivís ahora.</div>
+    <input type="text" id="inLugar" maxlength="40" placeholder="Ej: Concepción, Encarnación, Campo..." list="ciudadesList">
     <datalist id="ciudadesList">
       <option value="Asunción"><option value="Ciudad del Este"><option value="Encarnación">
       <option value="San Lorenzo"><option value="Luque"><option value="Capiatá">
@@ -776,8 +1240,47 @@ textarea:focus,input[type=text]:focus,input[type=password]:focus{border-color:va
       <option value="Francia"><option value="España"><option value="Ucrania">
       <option value="Rusia"><option value="Estados Unidos"><option value="Canadá">
     </datalist>
-    <button class="btn btn-oro" onclick="guardarNombre()" id="startBtn" style="margin-top:4px;">🚀 Empezar a participar — ¡gratis!</button>
+    <div style="position:sticky;bottom:0;background:var(--gris);padding:10px 0 4px;margin-top:4px;border-top:1px solid var(--gris3);">
+      <button class="btn btn-oro" onclick="guardarNombre()" id="startBtn">🚀 Empezar a participar — ¡gratis!</button>
+    </div>
+    <div style="background:rgba(39,174,96,.07);border:1px solid rgba(39,174,96,.25);border-radius:10px;padding:12px 14px;margin:10px 0;font-size:11px;color:var(--texto2);line-height:1.7;">
+      <div style="font-size:13px;font-weight:800;color:var(--texto);margin-bottom:6px;">🌿 Tu voz, nuestra lengua</div>
+      El guaraní tiene 500 años de historia. Pero en el mundo digital, todavía no tiene voz.<br><br>
+      Al participar, tus frases y grabaciones pasan a formar parte de algo más grande: un patrimonio lingüístico vivo que beneficia a investigadores, universidades, comunidades educativas, instituciones culturales, a las generaciones futuras de hablantes y a todos los que trabajan para que el guaraní siga creciendo, presente y orgulloso en el mundo — y que, para lograrlo, se apoya en la inteligencia artificial como herramienta.<br><br>
+      <strong style="color:var(--texto);">No recopilamos datos personales. Tu nombre guaraní es tuyo — no revela tu identidad real.</strong><br><br>
+      <em style="color:var(--oro);">Lo que compartís hoy, le enseña al futuro cómo suena nuestra lengua.</em>
+    </div>
     <div style="font-size:10px;color:var(--texto2);text-align:center;margin-top:8px;">🔒 Sin registro, sin email, sin contraseña</div>
+
+    <!-- DIVIDER -->
+    <div style="display:flex;align-items:center;gap:8px;margin:16px 0;">
+      <div style="flex:1;height:1px;background:var(--gris3);"></div>
+      <div style="font-size:10px;color:var(--texto2);font-weight:800;text-transform:uppercase;letter-spacing:1px;">¿Ya sos parte? Iniciá sesión</div>
+      <div style="flex:1;height:1px;background:var(--gris3);"></div>
+    </div>
+
+    <!-- BLOCK 2: YA TENGO CUENTA -->
+    <div style="background:var(--gris2);border-radius:10px;padding:14px;margin-bottom:10px;">
+      <div style="font-size:11px;color:var(--texto2);margin-bottom:10px;line-height:1.5;">
+        Ingresá tu nombre guaraní y la región de donde viene tu guaraní para acceder desde cualquier dispositivo — aunque hayas borrado las cookies o estés usando otro teléfono.
+      </div>
+      <input type="text" id="loginNombre" maxlength="30" placeholder="Tu nombre guaraní..."
+        style="width:100%;background:var(--gris3);border:1px solid var(--gris4);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:8px 10px;outline:none;margin-bottom:8px;">
+      <input type="text" id="loginLugar" maxlength="40" placeholder="De dónde es tu guaraní..." list="ciudadesLoginList"
+        style="width:100%;background:var(--gris3);border:1px solid var(--gris4);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:8px 10px;outline:none;margin-bottom:10px;">
+      <datalist id="ciudadesLoginList">
+        <option value="Asunción"><option value="Ciudad del Este"><option value="Encarnación">
+        <option value="San Lorenzo"><option value="Concepción"><option value="Coronel Oviedo">
+        <option value="Villarrica"><option value="Pilar"><option value="Pedro Juan Caballero">
+        <option value="Caaguazú"><option value="Paraguarí"><option value="Argentina">
+        <option value="Brasil"><option value="Alemania"><option value="España">
+      </datalist>
+      <button class="btn btn-azul" onclick="loginConNombreLugar()" style="margin-bottom:4px;">🔑 Iniciar sesión</button>
+      <div style="text-align:center;margin-top:8px;">
+        <button onclick="mostrarRecovery()" style="background:none;border:none;color:var(--texto2);font-size:10px;cursor:pointer;font-family:'Nunito',sans-serif;text-decoration:underline;">¿Tenés WhatsApp registrado? Recuperá tu cuenta</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -798,10 +1301,10 @@ textarea:focus,input[type=text]:focus,input[type=password]:focus{border-color:va
     <div class="audio-form">
       <!-- LUGAR -->
       <div class="form-row">
-        <label>📍 ¿De dónde sos?
-          <span class="tooltip-q" onclick="showTooltip(this,'📍 Tu ubicación ayuda a identificar variantes regionales del guaraní — muy valioso para el dataset.','lugar_tip')">?</span>
+        <label>📍 ¿De dónde es tu guaraní?
+          <span class="tooltip-q" onclick="showTooltip(this,'🗣️ La ciudad o región donde creciste o aprendiste el guaraní — no necesariamente donde vivís ahora. Ayuda a identificar variantes regionales, muy valioso para el dataset.','lugar_tip')">?</span>
         </label>
-        <input type="text" id="audioLugar" maxlength="60" placeholder="Escribí tu ciudad..." list="ciudadesAudioList"
+        <input type="text" id="audioLugar" maxlength="60" placeholder="De dónde es tu guaraní..." list="ciudadesAudioList"
           style="width:100%;background:var(--gris3);border:1px solid var(--gris4);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:8px 10px;outline:none;margin-bottom:0;">
         <datalist id="ciudadesAudioList">
           <option value="Asunción"><option value="Ciudad del Este"><option value="Encarnación">
@@ -886,7 +1389,7 @@ textarea:focus,input[type=text]:focus,input[type=password]:focus{border-color:va
 // SUPABASE
 // ═══════════════════════════════════════════════════════
 const SB_URL='https://nnvghlttygclvxjbuixl.supabase.co';
-const SB_KEY='sb_publishable_kdB53X0nPtKbOM8GbBzm5w_VzHBQBhA';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5udmdobHR0eWdjbHZ4amJ1aXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyNjY4MjAsImV4cCI6MjA5MTg0MjgyMH0.8IhPQV9fuItQKNnUUQhPkBW-akcHQqpsw3-f9BRCLLQ';
 const sb=supabase.createClient(SB_URL,SB_KEY);
 
 // ═══════════════════════════════════════════════════════
@@ -900,21 +1403,21 @@ const LANGS={es:{flag:'🇵🇾',name:'Español',label:'ES'},pt:{flag:'🇧🇷'
 // Frases ejemplo por categoría
 const FRASES_EJEMPLO=[
   {id:'ej1',guarani:"Che py'a guasu.",espanol:"Tengo el corazón grande / soy valiente.",porque:"Literalmente significa 'mi hígado es grande'. En guaraní, el hígado es la sede del valor. Imposible de traducir sin perder la fuerza.",tags:["🧩 Intraducible"],votos_like:31,votos_fire:19,flags_error:0,seleccionada:true,silva_sello:true,es_ejemplo:true,
-    profiles:{nombre:"Mbarete",lugar:"Asunción",avatar_color:"#F4A823",avatar_fg:"#000"}},
+    profiles:{nombre:"Jopara Vibe",lugar:"Paraguay",avatar_color:"#27AE60",avatar_fg:"#fff"}},
   {id:'ej2',guarani:"Jaguata peteĩ yvoty rendápe.",espanol:"Caminemos hacia donde están las flores.",porque:"Se usa para invitar a alguien hacia algo bueno. No es literal — es una metáfora de esperanza cotidiana.",tags:["📖 Dicho popular"],votos_like:24,votos_fire:8,flags_error:0,seleccionada:false,silva_sello:false,es_ejemplo:true,
-    profiles:{nombre:"Yvoty",lugar:"Asunción",avatar_color:"#27AE60",avatar_fg:"#fff"}},
+    profiles:{nombre:"Jopara Vibe",lugar:"Paraguay",avatar_color:"#27AE60",avatar_fg:"#fff"}},
   {id:'ej3',guarani:"Mba'éichapa reime?",espanol:"¿Cómo estás?",porque:"El saludo más usado en Paraguay. Simple, cálido, cotidiano. Si sabés decir esto, ya hablás guaraní.",tags:["🏠 Cotidiano"],votos_like:45,votos_fire:22,flags_error:0,seleccionada:true,silva_sello:true,es_ejemplo:true,
-    profiles:{nombre:"Ara",lugar:"Asunción",avatar_color:"#1B4FD8",avatar_fg:"#fff"}},
+    profiles:{nombre:"Jopara Vibe",lugar:"Paraguay",avatar_color:"#27AE60",avatar_fg:"#fff"}},
   {id:'ej4',guarani:"Rohayhu.",espanol:"Te quiero / Te amo.",porque:"Una sola palabra que lo dice todo. Ro = yo a vos, hayhu = querer/amar. El amor en guaraní cabe en cuatro sílabas.",tags:["❤️ Sentimental"],votos_like:67,votos_fire:41,flags_error:0,seleccionada:true,silva_sello:true,es_ejemplo:true,
-    profiles:{nombre:"Pytã",lugar:"Asunción",avatar_color:"#D62828",avatar_fg:"#fff"}},
+    profiles:{nombre:"Jopara Vibe",lugar:"Paraguay",avatar_color:"#27AE60",avatar_fg:"#fff"}},
   {id:'ej5',guarani:"Ha'e oñembyasy heta.",espanol:"Se queja demasiado.",porque:"El que dice esto con la cara indicada vale más que mil palabras. Guaraní para el drama del vecino.",tags:["😂 Humor"],votos_like:38,votos_fire:29,flags_error:0,seleccionada:false,silva_sello:false,es_ejemplo:true,
-    profiles:{nombre:"Aguara",lugar:"Ciudad del Este",avatar_color:"#8E44AD",avatar_fg:"#fff"}},
+    profiles:{nombre:"Jopara Vibe",lugar:"Paraguay",avatar_color:"#27AE60",avatar_fg:"#fff"}},
   {id:'ej6',guarani:"Yvytu pytũ oú.",espanol:"Viene el viento oscuro — se acerca la tormenta.",porque:"Viento oscuro. En una frase, el guaraní captura lo que el español necesita en cinco palabras. La naturaleza habla en guaraní.",tags:["🌿 Naturaleza"],votos_like:19,votos_fire:14,flags_error:0,seleccionada:false,silva_sello:false,es_ejemplo:true,
-    profiles:{nombre:"Yvytu",lugar:"Encarnación",avatar_color:"#16A085",avatar_fg:"#fff"}},
+    profiles:{nombre:"Jopara Vibe",lugar:"Paraguay",avatar_color:"#27AE60",avatar_fg:"#fff"}},
   {id:'ej7',guarani:"Che py'a potĩ.",espanol:"Tengo el corazón limpio / soy inocente.",porque:"Expresión jurídica y espiritual a la vez. 'Py'a potĩ' es la defensa más antigua del guaraní.",tags:["⚖️ Jurídico"],votos_like:12,votos_fire:6,flags_error:0,seleccionada:false,silva_sello:false,es_ejemplo:true,
-    profiles:{nombre:"Karai",lugar:"Asunción",avatar_color:"#E67E22",avatar_fg:"#fff"}},
+    profiles:{nombre:"Jopara Vibe",lugar:"Paraguay",avatar_color:"#27AE60",avatar_fg:"#fff"}},
   {id:'ej8',guarani:"Che rasy.",espanol:"Me duele / Estoy enfermo/a.",porque:"La frase médica más básica. Che = yo, rasy = dolor/enfermedad. La primera frase que todo médico en Paraguay debería saber.",tags:["🏥 Médico / Salud"],votos_like:16,votos_fire:7,flags_error:0,seleccionada:false,silva_sello:false,es_ejemplo:true,
-    profiles:{nombre:"Ysyrý",lugar:"Asunción",avatar_color:"#2980B9",avatar_fg:"#fff"}},
+    profiles:{nombre:"Jopara Vibe",lugar:"Paraguay",avatar_color:"#27AE60",avatar_fg:"#fff"}},
 ];
 
 const NOMBRES_GN=[
@@ -953,29 +1456,184 @@ const NOMBRES_GN=[
 // ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
-let S={lang:'es',profile:null,rol:'usuario',frases:[...FRASES_EJEMPLO],nombres:[...NOMBRES_GN],sugerencias:[],votes:{},feedbacks:{},filtro:'todos',cTipos:{},adminUnlocked:false,lektorUnlocked:false,pendingAdminType:null,votosHora:0,votosHoraReset:Date.now()};
+let S={lang:'es',profile:null,rol:'usuario',frases:[...FRASES_EJEMPLO],nombres:[...NOMBRES_GN],sugerencias:[],votes:{},feedbacks:{},filtro:'todos',cTipos:{},adminUnlocked:false,lektorUnlocked:false,pendingAdminType:null,votosHora:0,votosHoraReset:Date.now(),demoMode:false,customSorteoDate:null};
 
 // ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
-window.onload=async()=>{
+// ════════════════════════════════════════════
+// WHATSAPP BACKUP / RECOVERY SYSTEM
+// ════════════════════════════════════════════
+function showWhatsAppPrompt() {
+  // Only show if user hasn't seen it yet and has no WA saved
+  if(localStorage.getItem('jv_wa_asked')) return;
+  if(S.profile?.whatsapp) return;
+  localStorage.setItem('jv_wa_asked','1');
+  
+  const modal = document.createElement('div');
+  modal.id = 'waPromptModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:flex-end;padding:20px;background:rgba(0,0,0,.7);';
+  modal.innerHTML = `
+    <div style="background:var(--gris);border:2px solid var(--verde);border-radius:20px;padding:24px;width:100%;max-width:480px;margin:0 auto;">
+      <div style="font-size:28px;text-align:center;margin-bottom:10px;">📱</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:8px;text-align:center;">¡Ya tenés puntos!</div>
+      <div style="font-size:12px;color:var(--texto2);line-height:1.7;margin-bottom:14px;text-align:center;">
+        ¿Querés poder entrar desde otro dispositivo o recuperar tu cuenta si perdés el teléfono?<br>
+        <strong style="color:var(--texto);">Dejá tu WhatsApp — solo para eso.</strong><br>
+        <span style="font-size:10px;">No lo compartimos con nadie. Solo para recuperar tu cuenta y avisarte si ganás.</span>
+      </div>
+      <input type="tel" id="waInput" placeholder="Ej: +595981234567" maxlength="20"
+        style="width:100%;background:var(--gris2);border:1px solid var(--gris3);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:10px;outline:none;margin-bottom:10px;">
+      <button class="btn btn-verde" onclick="guardarWhatsApp()" style="margin-bottom:8px;">📱 Guardar WhatsApp</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('waPromptModal').remove()" style="font-size:11px;padding:8px;">Ahora no, gracias</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+async function guardarWhatsAppPerfil() {
+  const wa = document.getElementById('waPerfilInput')?.value.trim();
+  if(!wa || wa.length < 8) { toast2('Ingresá un número válido 📱'); return; }
+  try {
+    await sb.from('profiles').update({whatsapp: wa}).eq('id', S.profile.id);
+    S.profile.whatsapp = wa;
+    saveLocal();
+    cerrarPerfil();
+    toast2('✅ ¡WhatsApp guardado! Tu cuenta está protegida.');
+  } catch(e) { toast2('Error al guardar. Intentá de nuevo.'); }
+}
+
+async function guardarWhatsApp() {
+  const wa = document.getElementById('waInput')?.value.trim();
+  if(!wa || wa.length < 8) { toast2('Ingresá un número válido 📱'); return; }
+  try {
+    await sb.from('profiles').update({whatsapp: wa}).eq('id', S.profile.id);
+    S.profile.whatsapp = wa;
+    saveLocal();
+    document.getElementById('waPromptModal')?.remove();
+    toast2('✅ ¡WhatsApp guardado! Tu cuenta está protegida.');
+  } catch(e) {
+    toast2('Error al guardar. Intentá de nuevo.');
+  }
+}
+
+async function loginConNombreLugar() {
+  const nombre = document.getElementById('loginNombre')?.value.trim();
+  const lugar = document.getElementById('loginLugar')?.value.trim();
+  if(!nombre) { toast2('Ingresá tu nombre guaraní 🌿'); return; }
+  if(!lugar) { toast2('Ingresá de dónde es tu guaraní 🗣️'); return; }
+  try {
+    const {data, error} = await sb.from('profiles').select('*')
+      .eq('nombre', nombre).eq('lugar', lugar).single();
+    if(data) {
+      S.profile = data;
+      saveLocal();
+      document.getElementById('modalNombre')?.classList.remove('show');
+      updateBienvenida();
+      renderFrases();
+      playWelcome(); haptic(60);
+      toast2('✅ ¡Bienvenido/a de vuelta, ' + data.nombre + '!');
+    } else {
+      toast2('No encontramos esa combinación. ¿Escribiste bien los datos?');
+    }
+  } catch(e) {
+    toast2('No encontramos esa cuenta. Verificá los datos.');
+  }
+}
+
+function checkWaPrompt() {
+  if(!S.profile) return;
+  if(S.profile.whatsapp) return;
+  if(localStorage.getItem('jv_wa_asked')) return;
+  const pts = S.profile.puntos || 0;
+  // Show popup at 50 points threshold
+  if(pts >= 50) showWhatsAppPrompt();
+}
+
+function mostrarRecovery() {
+  document.getElementById('modalNombre').classList.remove('show');
+  const modal = document.createElement('div');
+  modal.id = 'recoveryModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:flex-end;padding:20px;background:rgba(0,0,0,.75);';
+  modal.innerHTML = `
+    <div style="background:var(--gris);border:2px solid var(--oro);border-radius:20px;padding:24px;width:100%;max-width:480px;margin:0 auto;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:8px;text-align:center;">🔑 Recuperar cuenta</div>
+      <div style="font-size:12px;color:var(--texto2);line-height:1.6;margin-bottom:14px;">
+        Ingresá tu nombre guaraní y el WhatsApp que registraste para recuperar tu cuenta.
+      </div>
+      <label style="font-size:11px;font-weight:700;color:var(--texto2);display:block;margin-bottom:4px;">Tu nombre guaraní</label>
+      <input type="text" id="recoveryNombre" placeholder="Ej: Yvoty" maxlength="30"
+        style="width:100%;background:var(--gris2);border:1px solid var(--gris3);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:10px;outline:none;margin-bottom:10px;">
+      <label style="font-size:11px;font-weight:700;color:var(--texto2);display:block;margin-bottom:4px;">Tu WhatsApp registrado</label>
+      <input type="tel" id="recoveryWa" placeholder="Ej: +595981234567" maxlength="20"
+        style="width:100%;background:var(--gris2);border:1px solid var(--gris3);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:10px;outline:none;margin-bottom:12px;">
+      <button class="btn btn-oro" onclick="recuperarCuenta()" style="margin-bottom:8px;">🔑 Recuperar mi cuenta</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('recoveryModal').remove();document.getElementById('modalNombre').classList.add('show');" style="font-size:11px;padding:8px;">Volver</button>
+      <div style="font-size:10px;color:var(--texto2);text-align:center;margin-top:10px;">¿No registraste WhatsApp? <a href="https://wa.me/595983967627?text=Hola, perdí mi cuenta en Jopara Vibe" style="color:var(--celeste);">Escribinos aquí</a></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+async function recuperarCuenta() {
+  const nombre = document.getElementById('recoveryNombre')?.value.trim();
+  const wa = document.getElementById('recoveryWa')?.value.trim();
+  if(!nombre || !wa) { toast2('Completá los dos campos 📱'); return; }
+  try {
+    const {data} = await sb.from('profiles').select('*').eq('nombre', nombre).eq('whatsapp', wa).single();
+    if(data) {
+      S.profile = data;
+      saveLocal();
+      document.getElementById('recoveryModal')?.remove();
+      document.getElementById('modalNombre')?.classList.remove('show');
+      updateBienvenida();
+      renderFrases();
+      toast2('✅ ¡Bienvenido/a de vuelta, ' + data.nombre + '!');
+      playWelcome();
+    } else {
+      toast2('No encontramos esa combinación. ¿Escribiste bien el número?');
+    }
+  } catch(e) {
+    toast2('No encontramos esa cuenta. Escribinos por WhatsApp.');
+  }
+}
+
+window.onload=()=>{
+  // Hide splash after 2.5s
+  setTimeout(()=>{
+    const splash = document.getElementById('splashScreen');
+    if(splash){
+      splash.style.opacity='0';
+      setTimeout(()=>{ splash.style.display='none'; }, 500);
+    }
+  }, 2500);
   loadLocal();
   detectLang();
   applyLang();
   renderLangPicker();
   renderFrasesGrabar();
-  renderAdminLoginSection();
   startCountdown();
   renderNombresGrid();
   renderSugerencias();
   renderFrases();
   renderRanking();
   updateBienvenida();
-  await loadFromSupabase();
-  if(!S.profile) setTimeout(()=>document.getElementById('modalNombre').classList.add('show'),800);
   loadSoundPref();
   checkStreak();
-  setTimeout(()=>showFeedTip(), 1500);
+  // Show login modal IMMEDIATELY - no delay, no async blocking
+  if(!S.profile){
+    const m = document.getElementById('modalNombre');
+    if(m) m.classList.add('show');
+  }
+  // All async operations run in background - never block UI
+  setTimeout(async()=>{
+    await loadFromSupabase();
+    await loadDemoConfig();
+    updateDemoUI();
+    renderFrases();
+    renderRanking();
+    setTimeout(()=>showFeedTip(), 1500);
+  }, 100);
 };
 
 function loadLocal(){
@@ -983,7 +1641,7 @@ function loadLocal(){
 const realFrases=(S.frases||[]).filter(f=>!f.es_ejemplo);
 S.frases=[...FRASES_EJEMPLO,...realFrases];if(!S.nombres||S.nombres.length===0)S.nombres=[...NOMBRES_GN];document.getElementById('ptsH').textContent=S.profile?.puntos||0;}}catch(e){}
 }
-function saveLocal(){try{localStorage.setItem('jv_state',JSON.stringify({profile:S.profile,rol:S.rol,votes:S.votes,feedbacks:S.feedbacks,lang:S.lang,adminUnlocked:S.adminUnlocked,lektorUnlocked:S.lektorUnlocked,votosHora:S.votosHora,votosHoraReset:S.votosHoraReset}));}catch(e){}}
+function saveLocal(){try{if(typeof localStorage==='undefined')return;localStorage.setItem('jv_state',JSON.stringify({profile:S.profile,rol:S.rol,votes:S.votes,feedbacks:S.feedbacks,lang:S.lang,adminUnlocked:S.adminUnlocked,lektorUnlocked:S.lektorUnlocked,votosHora:S.votosHora,votosHoraReset:S.votosHoraReset}));}catch(e){}}
 
 async function loadFromSupabase(){
   try{
@@ -1346,7 +2004,7 @@ function showTab(name,el){
     setTimeout(()=>playTick(4), 200);
     setTimeout(()=>{ if(window._countdownUpdate) window._countdownUpdate(); }, 100);
   }
-  if(name==='feed') setTimeout(()=>initScrollReveal(), 100);
+  if(name==='feed'){ renderFrases(); }
 }
 function filtrar(el,tipo){
   document.querySelectorAll('.filtro').forEach(f=>f.classList.remove('active'));
@@ -1476,7 +2134,7 @@ function verPerfil(nombre,lugar,bg,fg){
 }
 
 function renderPerfilModal(nombre,lugar,bg,fg,esPropio){
-  const misFreses=S.frases.filter(f=>f.profiles?.nombre===nombre||f.autor_id===S.profile?.id&&nombre===S.profile?.nombre);
+  const misFreses=S.frases.filter(f=>!f.es_ejemplo&&(f.profiles?.nombre===nombre||f.autor_id===S.profile?.id&&nombre===S.profile?.nombre));
   const totalVotos=misFreses.reduce((a,f)=>(f.votos_like||0)+(f.votos_fire||0)+a,0);
   const pts=esPropio?(S.profile?.puntos||0):Math.round((totalVotos*4)+misFreses.length*15);
 
@@ -1503,6 +2161,7 @@ function renderPerfilModal(nombre,lugar,bg,fg,esPropio){
       <div>
         <div class="perfil-nombre">${nombre}</div>
         <div class="perfil-lugar">📍 ${lugar||'Paraguay'}</div>
+        ${esPropio && S.profile.pioneer ? '<div style="font-size:11px;color:var(--oro);margin-top:3px;">🌟 Fundador/a</div>' : ''}
         ${esPropio?'<div style="font-size:10px;color:var(--oro);margin-top:3px;">Tu perfil</div>':''}
       </div>
     </div>
@@ -1544,6 +2203,17 @@ function renderPerfilModal(nombre,lugar,bg,fg,esPropio){
       ` : ''}
     </div>
     ` : ''}
+    ${esPropio && !S.profile.whatsapp ? `
+    <div style="border-top:1px solid var(--gris3);margin-top:16px;padding-top:14px;">
+      <div style="font-size:10px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📱 Acceso y seguridad</div>
+      <div style="font-size:11px;color:var(--texto2);margin-bottom:10px;line-height:1.6;">Registrá tu WhatsApp para entrar desde cualquier dispositivo o recuperar tu cuenta si perdés o rompés el teléfono. Si ganás un premio, te avisamos automáticamente.</div>
+      <input type="tel" id="waPerfilInput" placeholder="+595981234567" maxlength="20"
+        style="width:100%;background:var(--gris2);border:1px solid var(--gris3);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:8px 10px;outline:none;margin-bottom:8px;">
+      <button class="btn btn-verde btn-sm" onclick="guardarWhatsAppPerfil()" style="width:100%;margin-bottom:4px;">📱 Guardar WhatsApp</button>
+    </div>
+    ` : esPropio && S.profile.whatsapp ? `
+    <div style="border-top:1px solid var(--gris3);margin-top:16px;padding-top:10px;font-size:11px;color:var(--verde);">✅ Cuenta protegida · Acceso multi-dispositivo activo</div>
+    ` : ''}
     <button class="btn btn-ghost" onclick="cerrarPerfil()" style="margin-top:12px;">Cerrar</button>
   `;
 }
@@ -1559,15 +2229,41 @@ function guardarBio(){
 // ═══════════════════════════════════════════════════════
 function renderNombresGrid(){
   const disp=S.nombres.filter(n=>!n.tomado_por&&!n.reservado_para);
-  const shuffled=[...disp].sort(()=>Math.random()-.5).slice(0,6);
   const grid=document.getElementById('nombresGrid');
   if(!grid)return;
-  grid.innerHTML=shuffled.map(n=>`<div class="nc" onclick="selNombre(this,'${n.nombre.replace(/'/g,"\\'")}')">
-      <div style="font-size:28px;text-align:center;margin-bottom:4px;">${n.emoji||'🌿'}</div>
+  grid.innerHTML=disp.map(n=>`<div class="nc" id="nc-${n.id}" onclick="selNombreAnimado(this,'${n.nombre.replace(/'/g,"\'")}','${n.id}')">
+      <div class="nc-icon" id="icon-${n.id}" style="font-size:28px;text-align:center;margin-bottom:4px;transition:transform .3s ease;">${n.emoji||NOMBRE_EMOJI[n.nombre]||'🌿'}</div>
       <div class="nc-gn">${n.nombre}</div>
       <div class="nc-es">${n.significado}</div>
     </div>`).join('');
+  renderPioneerCounter();
 }
+
+function selNombreAnimado(el, nombre, id) {
+  const icon = document.getElementById('icon-'+id);
+  if(icon) {
+    icon.style.transform = 'scale(1.5) rotate(12deg)';
+    setTimeout(()=>{ icon.style.transform = 'scale(1) rotate(0deg)'; }, 400);
+  }
+  document.querySelectorAll('.nc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('inNombre').value = nombre;
+  setTimeout(()=>{ document.getElementById('startBtn')?.scrollIntoView({behavior:'smooth',block:'center'}); }, 350);
+}
+
+function renderPioneerCounter() {
+  const taken = S.nombres.filter(n=>n.tomado_por).length;
+  const remaining = Math.max(0, 30 - taken);
+  const el = document.getElementById('pioneerCounter');
+  if(!el) return;
+  if(remaining > 0) {
+    el.innerHTML = `🌟 <strong style="color:var(--oro);">¡Quedan ${remaining} lugares de Fundador/a!</strong><br>Los primeros 30 participantes reciben el badge exclusivo y +100 pts extra.`;
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
 
 function selNombre(el,nombre){
   document.querySelectorAll('.nc').forEach(c=>c.classList.remove('sel'));
@@ -1580,7 +2276,9 @@ async function guardarNombre(){
   if(!nombre){toast2(t('toast_name'));return;}
   if(!lugar){toast2(t('toast_lugar'));return;}
   const[bg,fg]=AV[Math.floor(Math.random()*AV.length)];
-  const profile={nombre,lugar,rol:'usuario',puntos:10,avatar_color:bg,avatar_fg:fg};
+  const takenNow = S.nombres.filter(n=>n.tomado_por).length;
+  const pioneer = takenNow < 30;
+  const profile={nombre,lugar,rol:'usuario',puntos:pioneer?110:10,avatar_color:bg,avatar_fg:fg,whatsapp:'',pioneer};
   try{
     const{data,error}=await sb.from('profiles').insert(profile).select().single();
     if(error&&error.code==='23505'){toast2(t('toast_name_taken'));return;}
@@ -1590,8 +2288,19 @@ async function guardarNombre(){
   document.getElementById('ptsH').textContent=10;
   document.getElementById('modalNombre').classList.remove('show');
   saveLocal();updateBienvenida();
+  // Check pioneer bonus - first 30 users
+  const takenCount = S.nombres.filter(n=>n.tomado_por).length;
+  const isPioneer = takenCount < 30;
+  const welcomePts = isPioneer ? 110 : 10; // 10 base + 100 pioneer bonus
   playWelcome(); haptic(50);
-  popupPts(10,'¡Bienvenido/a a la comunidad!');
+  if(isPioneer) {
+    S.profile.puntos = (S.profile.puntos||0) + 100; // extra pioneer pts
+    document.getElementById('ptsH').textContent = S.profile.puntos;
+    saveLocal();
+    setTimeout(()=>toast2('🌟 ¡Sos Fundador/a! +100 pts de bienvenida'), 2000);
+  }
+  popupPts(welcomePts, isPioneer ? '🌟 ¡Fundador/a! Bonus especial' : '¡Bienvenido/a a la comunidad!');
+
   // Auto-sugerir si nombre no está en lista + puntos
   const enLista=S.nombres.some(n=>n.nombre.toLowerCase()===nombre.toLowerCase());
   if(!enLista&&nombre.length>2){
@@ -1619,16 +2328,16 @@ async function votar(id,tipo){
   if(f&&(f.profiles?.nombre===S.profile.nombre||f.autor_id===S.profile.id)){toast2(t('toast_own'));return;}
   if(S.votes[id]){toast2(t('toast_already'));return;}
   // 10 min cooldown for new users — show friendly modal
-  if(S.profile.created_at){
+  if(!S.demoMode && S.profile.created_at){
     const age = Date.now() - new Date(S.profile.created_at).getTime();
     if(age < 600000){ abrirCooldown(600000 - age); return; }
   }
   // Reset daily vote counter
   if(Date.now()-S.votosHoraReset>86400000){S.votosHora=0;S.votosHoraReset=Date.now();}
-  if(S.votosHora>=30){toast2(t('toast_limit'));return;}
+  if(!S.demoMode && S.votosHora>=30){toast2(t('toast_limit'));return;}
   S.votes[id]=tipo;S.votosHora++;
   if(f){if(tipo==='like')f.votos_like=(f.votos_like||0)+1;else f.votos_fire=(f.votos_fire||0)+1;}
-  if(S.profile){S.profile.puntos=(S.profile.puntos||0)+1;document.getElementById('ptsH').textContent=S.profile.puntos;}
+  if(S.profile){S.profile.puntos=(S.profile.puntos||0)+1;document.getElementById('ptsH').textContent=S.profile.puntos;checkWaPrompt();}
   saveLocal();renderFrases();renderRanking();updateBienvenida();
   haptic(tipo === 'fire' ? 60 : 30);
   try{spawnParticles(document.querySelector('.vbtn.vl,.vbtn.vf')||document.body,tipo);}catch(e){}
@@ -1646,7 +2355,7 @@ async function fbRapido(id,tipo){
   S.feedbacks[id]=tipo;
   const f=S.frases.find(f=>f.id===id||f.id===String(id));
   if(f&&tipo==='error')f.flags_error=(f.flags_error||0)+1;
-  if(S.profile){S.profile.puntos=(S.profile.puntos||0)+1;document.getElementById('ptsH').textContent=S.profile.puntos;}
+  if(S.profile){S.profile.puntos=(S.profile.puntos||0)+1;document.getElementById('ptsH').textContent=S.profile.puntos;checkWaPrompt();}
   saveLocal();renderFrases();
   const m={ok:t('toast_fb_ok'),variante:t('toast_fb_var'),error:t('toast_fb_err')};
   toast2(m[tipo]);
@@ -1680,7 +2389,7 @@ async function enviarC(id){
   // 30 second cooldown between comments
   if(!S.lastComentario) S.lastComentario=0;
   const elapsed=Date.now()-S.lastComentario;
-  if(elapsed<120000){
+  if(!S.demoMode && elapsed<120000){
     const secsLeft=Math.ceil((120000-elapsed)/1000);
     const mins=Math.floor(secsLeft/60),secs=secsLeft%60;
     toast2('⏳ Esperá '+(mins>0?mins+'m ':'')+secs+'s antes de comentar de nuevo');
@@ -1814,6 +2523,7 @@ async function sugerirNombre(){
 
 function renderSugerencias(){
   const c=document.getElementById('sugerenciasList');
+  if(!c) return;
   if(!S.sugerencias||S.sugerencias.length===0){c.innerHTML='<div style="font-size:12px;color:var(--texto2);">No hay sugerencias pendientes todavía.</div>';return;}
   c.innerHTML=S.sugerencias.map(s=>`<div class="sug-card"><div class="sug-info"><div class="sug-gn">${s.nombre}</div><div class="sug-es">${s.significado} — por ${s.profiles?.nombre||'?'}</div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0;"><span class="sug-v">👍 ${s.votos||0}</span><button class="btn btn-azul btn-sm" onclick="votarSug('${s.id}')">Votar</button>${S.rol==='admin'||S.lektorUnlocked?`<button class="btn btn-verde btn-sm" onclick="aprobarSug('${s.id}','${s.nombre.replace(/'/g,"\\'")}','${s.significado.replace(/'/g,"\\'")}')">✅</button>`:''}</div></div>`).join('');
 }
@@ -1878,10 +2588,16 @@ function startCountdown(){
   function update(){
     const cdTime=document.getElementById('cdTime');
     const cdSub=document.getElementById('cdSub');
-    if(!cdTime||!cdSub) return; // element not in DOM yet
+    if(!cdTime||!cdSub) return;
     const now=new Date(),launch=new Date('2026-04-15');
     const firstDraw=new Date(launch.getFullYear(),launch.getMonth()+2,1);
-    const target=now<firstDraw?firstDraw:new Date(now.getFullYear(),now.getMonth()+1,1);
+    // Use custom date if set by admin
+    let target;
+    if(S.customSorteoDate) {
+      target = new Date(S.customSorteoDate);
+    } else {
+      target=now<firstDraw?firstDraw:new Date(now.getFullYear(),now.getMonth()+1,1);
+    }
     const diff=target-now;
     if(diff<=0){cdTime.textContent='¡HOY!';return;}
     const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m=Math.floor((diff%3600000)/60000);
@@ -2666,6 +3382,29 @@ async function sugerirNombrePerfil() {
 
     <!-- DASHBOARD -->
     <div class="admin-sec active" id="admin-dashboard">
+      <!-- DEMO MODE TOGGLE -->
+      <div style="background:var(--gris);border:2px solid var(--oro);border-radius:12px;padding:14px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-size:11px;font-weight:800;color:var(--oro);text-transform:uppercase;letter-spacing:1px;">🧪 Modo Demo</div>
+          <div id="demoStatus" style="font-size:11px;color:var(--texto2);">Inactivo</div>
+        </div>
+        <div style="font-size:11px;color:var(--texto2);margin-bottom:10px;line-height:1.5;">Desactiva todos los cooldowns y límites para pruebas. Se muestra un banner a todos los usuarios.</div>
+        <button id="demoBtn" class="btn btn-oro btn-sm" onclick="toggleDemoMode()" style="width:100%;">🧪 Activar Modo Demo</button>
+      </div>
+
+      <!-- CUSTOM COUNTDOWN -->
+      <div style="background:var(--gris);border:1px solid var(--gris3);border-radius:12px;padding:14px;margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:800;color:var(--texto2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">⏱️ Fecha del próximo sorteo</div>
+        <div style="font-size:11px;color:var(--texto2);margin-bottom:10px;line-height:1.5;">Establecé una fecha y hora exacta para el sorteo. Útil para probar las notificaciones automáticas.</div>
+        <input type="datetime-local" id="sorteoDateInput"
+          style="width:100%;background:var(--gris2);border:1px solid var(--gris3);border-radius:8px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:8px 10px;outline:none;margin-bottom:8px;">
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-azul btn-sm" onclick="guardarFechaSorteo()" style="flex:1;">💾 Guardar fecha</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetFechaSorteo()" style="flex:1;">↩️ Restablecer automático</button>
+        </div>
+        <div id="sorteoDateStatus" style="font-size:10px;color:var(--texto2);margin-top:6px;text-align:center;"></div>
+      </div>
+
       <div class="stat-grid" id="adminStatGrid">
         <div class="stat-widget"><div class="n" id="asFrases">—</div><div class="l">Frases</div><div class="sub" id="asNuevas">cargando...</div></div>
         <div class="stat-widget"><div class="n" id="asUsuarios">—</div><div class="l">Usuarios</div><div class="sub" id="asActivos">activos</div></div>
@@ -2760,6 +3499,26 @@ async function sugerirNombrePerfil() {
           Se genera un log en Supabase antes del reset.
         </div>
 
+        <!-- INACTIVITY SETTINGS -->
+        <div style="background:rgba(126,200,227,.06);border:1px solid rgba(126,200,227,.2);border-radius:10px;padding:14px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:800;color:var(--celeste);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⏳ Limpieza por inactividad</div>
+          <div style="font-size:11px;color:var(--texto2);margin-bottom:10px;line-height:1.5;">Los usuarios inactivos serán eliminados. Sus frases quedan anónimas, sus nombres se liberan.</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <label style="font-size:11px;color:var(--texto2);white-space:nowrap;">Días de inactividad:</label>
+            <input type="number" id="inactividadDias" value="180" min="30" max="730"
+              style="width:80px;background:var(--gris2);border:1px solid var(--gris3);border-radius:6px;color:var(--texto);font-family:'Nunito',sans-serif;font-size:13px;padding:6px 8px;outline:none;">
+          </div>
+          <button class="btn btn-ghost" onclick="limpiarInactivos()" style="border-color:var(--celeste);color:var(--celeste);margin-bottom:6px;">⏳ Ver y limpiar inactivos</button>
+          <div id="inactivosLog" style="font-size:10px;color:var(--texto2);margin-top:6px;line-height:1.6;"></div>
+        </div>
+
+        <!-- Pioneer Reset - standalone, no 3-step -->
+        <div style="background:rgba(244,168,35,.06);border:1px solid rgba(244,168,35,.2);border-radius:10px;padding:14px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:800;color:var(--oro);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">🌟 Reset Pioneer (solo test)</div>
+          <div style="font-size:11px;color:var(--texto2);margin-bottom:10px;line-height:1.5;">Libera los 30 slots Pioneer sin borrar frases ni usuarios. Útil durante el período de prueba.</div>
+          <button class="btn btn-ghost" onclick="resetPioneer()" style="border-color:var(--oro);color:var(--oro);">🌟 Resetear slots Pioneer</button>
+        </div>
+
         <!-- Step 1 -->
         <div class="reset-step active" id="resetStep1">
           <button class="btn btn-rojo" onclick="resetStep(2)">⚠️ Sí, quiero hacer un reset</button>
@@ -2819,5 +3578,36 @@ async function sugerirNombrePerfil() {
   </div>
 </div>
 
+<script>
+// Service Worker registration for PWA
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js')
+      .then(reg=>console.log('SW registered'))
+      .catch(err=>console.log('SW error:', err));
+  });
+}
+
+// PWA Install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install button if we have the prompt
+  const installBtn = document.getElementById('installPwaBtn');
+  if(installBtn) installBtn.style.display = 'block';
+});
+
+function instalarPWA() {
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(result=>{
+    if(result.outcome==='accepted') toast2('✅ ¡Jopara Vibe instalada!');
+    deferredPrompt = null;
+    const btn = document.getElementById('installPwaBtn');
+    if(btn) btn.style.display = 'none';
+  });
+}
+</script>
 </body>
 </html>
